@@ -63,6 +63,9 @@ jobs:
       - name: Verify release source
         run: pnpm run check
 
+      - name: Build package
+        run: pnpm run build
+
       - name: Publish package
         run: |
           package_version="$(node -p "require('./package.json').version")"

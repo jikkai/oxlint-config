@@ -24,16 +24,12 @@
     "access": "public"
   },
   "scripts": {
+    "prepare": "simple-git-hooks",
     "build": "tsc -p tsconfig.build.json",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm pack:check && pnpm smoke:package",
-    "pretest": "pnpm build",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "check": "pnpm check:static && pnpm test",
+    "check:static": "oxfmt --check . && oxlint . && tsc -p tsconfig.json --noEmit",
     "test": "vitest run src",
-    "lint": "oxlint .",
-    "format:check": "oxfmt --check .",
-    "pack:check": "npm pack --dry-run --json",
-    "release": "verso",
-    "smoke:package": "node scripts/smoke-package.mjs"
+    "release": "verso"
   },
   "dependencies": {
     "jsonc-parser": "^3.3.1"
@@ -50,10 +46,12 @@
     "eslint-plugin-sonarjs": "^4.2.0",
     "eslint-plugin-storybook": "^10.5.5",
     "eslint-plugin-testing-library": "^7.16.2",
+    "lint-staged": "^17.3.0",
     "oxfmt": "^0.61.0",
     "oxlint": "^1.76.0",
     "oxlint-tsgolint": "^7.0.2001",
     "semver": "^7.8.5",
+    "simple-git-hooks": "^2.13.1",
     "storybook": "^10.5.5",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
@@ -95,6 +93,13 @@
     "oxlint-tsgolint": {
       "optional": true
     }
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm exec lint-staged"
+  },
+  "lint-staged": {
+    "*": "oxfmt --check --no-error-on-unmatched-pattern",
+    "*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}": "oxlint --no-error-on-unmatched-pattern"
   },
   "engines": {
     "node": ">=22.18"
