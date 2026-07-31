@@ -1,0 +1,5 @@
+[version]
+root_package = "package.json"
+
+[changelog]
+enabled = false

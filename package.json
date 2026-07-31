@@ -2,6 +2,7 @@
   "name": "@amamo/oxlint-config",
   "version": "0.1.0",
   "description": "Opinionated Oxlint presets and an Oxc initializer.",
+  "homepage": "https://jikkai.github.io/oxlint-config/",
   "license": "MIT",
   "author": "白熱 <sonne@asaki.me>",
   "bin": {
@@ -10,6 +11,7 @@
   "files": [
     "dist",
     "README.md",
+    "README-zh.md",
     "LICENSE"
   ],
   "type": "module",
@@ -25,17 +27,19 @@
   },
   "scripts": {
     "prepare": "simple-git-hooks",
+    "release": "verso",
     "build": "tsc -p tsconfig.build.json",
     "check": "pnpm check:static && pnpm test",
     "check:static": "oxfmt --check . && oxlint . && tsc -p tsconfig.json --noEmit",
-    "test": "vitest run src",
-    "release": "verso"
+    "test": "vitest run --dir src",
+    "docs:build": "pnpm build && pnpm --filter @amamo/oxlint-config-docs build",
+    "docs:dev": "pnpm build && pnpm --filter @amamo/oxlint-config-docs dev"
   },
   "dependencies": {
     "jsonc-parser": "^3.3.1"
   },
   "devDependencies": {
-    "@amamo/verso": "^1.0.0-rc.3",
+    "@amamo/verso": "1.0.0-rc.3",
     "@playwright/test": "^1.62.1",
     "@testing-library/dom": "^10.4.1",
     "@types/node": "^26.1.2",
