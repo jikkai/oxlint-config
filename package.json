@@ -1,6 +1,6 @@
 {
   "name": "@amamo/oxlint-config",
-  "version": "0.1.0",
+  "version": "1.0.0-alpha.0",
   "description": "Opinionated Oxlint presets and an Oxc initializer.",
   "homepage": "https://jikkai.github.io/oxlint-config/",
   "license": "MIT",
