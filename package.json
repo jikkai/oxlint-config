@@ -31,7 +31,7 @@
     "build": "tsc -p tsconfig.build.json",
     "check": "pnpm check:static && pnpm test",
     "check:static": "oxfmt --check . && oxlint . && tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --dir src",
+    "test": "pnpm build && vitest run --dir src",
     "docs:build": "pnpm build && pnpm --filter @amamo/oxlint-config-docs build",
     "docs:dev": "pnpm build && pnpm --filter @amamo/oxlint-config-docs dev"
   },
