@@ -1,0 +1,99 @@
+{
+  "name": "@amamo/oxlint-config",
+  "version": "0.1.0",
+  "description": "Opinionated Oxlint presets and an Oxc initializer.",
+  "license": "MIT",
+  "author": "白熱 <sonne@asaki.me>",
+  "bin": {
+    "amamo-oxlint-config": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "pretest": "pnpm build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run src",
+    "lint": "oxlint .",
+    "format:check": "oxfmt --check .",
+    "pack:check": "npm pack --dry-run --json",
+    "smoke:package": "node scripts/smoke-package.mjs"
+  },
+  "dependencies": {
+    "jsonc-parser": "^3.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@testing-library/dom": "^10.4.1",
+    "@types/node": "^26.1.2",
+    "eslint-plugin-cypress": "^6.4.3",
+    "eslint-plugin-mocha": "^12.0.1",
+    "eslint-plugin-playwright": "^2.11.0",
+    "eslint-plugin-regexp": "^3.1.1",
+    "eslint-plugin-sonarjs": "^4.2.0",
+    "eslint-plugin-storybook": "^10.5.5",
+    "eslint-plugin-testing-library": "^7.16.2",
+    "oxfmt": "^0.61.0",
+    "oxlint": "^1.76.0",
+    "oxlint-tsgolint": "^7.0.2001",
+    "storybook": "^10.5.5",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  },
+  "peerDependencies": {
+    "eslint-plugin-cypress": "^6.4.3",
+    "eslint-plugin-mocha": "^12.0.1",
+    "eslint-plugin-playwright": "^2.11.0",
+    "eslint-plugin-regexp": "^3.1.1",
+    "eslint-plugin-sonarjs": "^4.2.0",
+    "eslint-plugin-storybook": "^10.5.5",
+    "eslint-plugin-testing-library": "^7.16.2",
+    "oxfmt": "^0.61.0",
+    "oxlint": "^1.76.0",
+    "oxlint-tsgolint": "^7.0.2001"
+  },
+  "peerDependenciesMeta": {
+    "eslint-plugin-cypress": {
+      "optional": true
+    },
+    "eslint-plugin-mocha": {
+      "optional": true
+    },
+    "eslint-plugin-playwright": {
+      "optional": true
+    },
+    "eslint-plugin-regexp": {
+      "optional": true
+    },
+    "eslint-plugin-sonarjs": {
+      "optional": true
+    },
+    "eslint-plugin-storybook": {
+      "optional": true
+    },
+    "eslint-plugin-testing-library": {
+      "optional": true
+    },
+    "oxlint-tsgolint": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "packageManager": "pnpm@11.18.0"
+}
