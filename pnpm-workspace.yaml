@@ -8,3 +8,9 @@ minimumReleaseAgeExclude:
   - playwright@1.62.1
   - recast@0.23.17
   - vite@8.2.0
+  - "@amamo/verso-darwin-arm64@1.0.0-rc.3"
+  - "@amamo/verso-darwin-x64@1.0.0-rc.3"
+  - "@amamo/verso-linux-arm64@1.0.0-rc.3"
+  - "@amamo/verso-linux-x64@1.0.0-rc.3"
+  - "@amamo/verso-win32-x64@1.0.0-rc.3"
+  - "@amamo/verso@1.0.0-rc.3"

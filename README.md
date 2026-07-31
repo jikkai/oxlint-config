@@ -154,11 +154,18 @@ template rules.
 ## Verify locally
 
 ```sh
-pnpm typecheck
-pnpm build
-pnpm lint
+pnpm check
+```
+
+The aggregate check runs the following commands in order:
+
+```sh
 pnpm format:check
+pnpm lint
+pnpm typecheck
 pnpm test
 pnpm pack:check
 pnpm smoke:package
 ```
+
+The `pretest` lifecycle builds the package before Vitest runs.

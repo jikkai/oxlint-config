@@ -5,7 +5,7 @@
   "license": "MIT",
   "author": "白熱 <sonne@asaki.me>",
   "bin": {
-    "amamo-oxlint-config": "./dist/cli.js"
+    "amamo-oxlint-config": "dist/cli.js"
   },
   "files": [
     "dist",
@@ -25,18 +25,21 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm pack:check && pnpm smoke:package",
     "pretest": "pnpm build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run src",
     "lint": "oxlint .",
     "format:check": "oxfmt --check .",
     "pack:check": "npm pack --dry-run --json",
+    "release": "verso",
     "smoke:package": "node scripts/smoke-package.mjs"
   },
   "dependencies": {
     "jsonc-parser": "^3.3.1"
   },
   "devDependencies": {
+    "@amamo/verso": "^1.0.0-rc.3",
     "@playwright/test": "^1.62.1",
     "@testing-library/dom": "^10.4.1",
     "@types/node": "^26.1.2",
@@ -50,6 +53,7 @@
     "oxfmt": "^0.61.0",
     "oxlint": "^1.76.0",
     "oxlint-tsgolint": "^7.0.2001",
+    "semver": "^7.8.5",
     "storybook": "^10.5.5",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
