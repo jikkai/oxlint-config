@@ -5,6 +5,7 @@ export type PresetKey =
   | "promise"
   | "react"
   | "reactPerf"
+  | "tailwindcss"
   | "nextjs"
   | "jsxA11y"
   | "vue"
@@ -38,6 +39,7 @@ export interface IConfigState {
   regexp: boolean;
   sonarjs: boolean;
   storybook: boolean;
+  tailwindcss: boolean;
   testingLibrary: boolean;
   typeAware: boolean;
   typescript: boolean;
@@ -52,6 +54,7 @@ export const presetKeys: readonly PresetKey[] = [
   "promise",
   "react",
   "reactPerf",
+  "tailwindcss",
   "nextjs",
   "jsxA11y",
   "vue",
@@ -96,6 +99,7 @@ export const defaultConfigState: IConfigState = {
   regexp: false,
   sonarjs: false,
   storybook: false,
+  tailwindcss: false,
   testingLibrary: false,
   typeAware: false,
   typescript: true,
@@ -144,6 +148,9 @@ export function renderConfigSnippet(state: IConfigState): string {
   if (!state.promise) lines.push("  promise: false,");
   if (state.react && !state.nextjs) lines.push("  react: true,");
   if (state.reactPerf) lines.push("  reactPerf: true,");
+  if (state.tailwindcss) {
+    lines.push('  tailwindcss: { entryPoint: "src/index.css" },');
+  }
   if (state.nextjs) lines.push("  nextjs: true,");
   if (state.jsxA11y !== "auto") lines.push(`  jsxA11y: ${state.jsxA11y === "on"},`);
   if (state.vue) lines.push("  vue: true,");
@@ -170,7 +177,8 @@ export function renderConfigSnippet(state: IConfigState): string {
 }
 
 export function requiredPackages(state: IConfigState): string[] {
-  const packages = state.typeAware ? ["oxlint-tsgolint"] : [];
+  const packages = state.tailwindcss ? ["oxlint-tailwindcss"] : [];
+  if (state.typeAware) packages.push("oxlint-tsgolint");
   for (const key of presetKeys) {
     const packageName = experimentalPackages[key];
     if (packageName && isPresetEnabled(state, key)) packages.push(packageName);

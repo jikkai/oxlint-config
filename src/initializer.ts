@@ -34,6 +34,7 @@ export interface IDetectedFeatures {
   nextjs: boolean;
   node: boolean;
   react: boolean;
+  tailwindcss?: string;
   typescript: boolean;
   vitest: boolean;
   vue: boolean;
@@ -55,6 +56,7 @@ export interface IInitializationChoices {
   node: boolean;
   react: boolean;
   reactPerf: boolean;
+  tailwindcss?: string;
   test: readonly ("jest" | "vitest")[];
   typeAware: boolean;
   typescript: boolean;
@@ -272,6 +274,54 @@ async function hasRootTypeScriptConfig(rootDir: string): Promise<boolean> {
   return false;
 }
 
+async function detectTailwindcssEntryPoint(
+  rootDir: string,
+  dependencies: Set<string>,
+  warnings: string[],
+): Promise<string | undefined> {
+  const candidates: string[] = [];
+
+  try {
+    for await (const path of glob("**/*.css", {
+      cwd: rootDir,
+      exclude: [
+        "**/.git/**",
+        "**/.next/**",
+        "**/build/**",
+        "**/coverage/**",
+        "**/dist/**",
+        "**/node_modules/**",
+      ],
+    })) {
+      try {
+        const source = (await readFile(join(rootDir, path), "utf8")).replace(
+          /\/\*[\s\S]*?(?:\*\/|$)/g,
+          "",
+        );
+        if (/^\s*@import\s+(?:url\(\s*)?["']tailwindcss["']/m.test(source)) candidates.push(path);
+      } catch (error) {
+        warnings.push(`Skipped unreadable stylesheet ${path}: ${errorMessage(error)}`);
+      }
+    }
+  } catch (error) {
+    warnings.push(`Skipped Tailwind CSS entry-point detection: ${errorMessage(error)}`);
+    return undefined;
+  }
+
+  const sortedCandidates = candidates.toSorted();
+  if (sortedCandidates.length === 1) return sortedCandidates[0];
+  if (sortedCandidates.length > 1) {
+    warnings.push(
+      `Multiple Tailwind CSS entry points detected: ${sortedCandidates.join(", ")}. Configure tailwindcss.entryPoint manually.`,
+    );
+  } else if (dependencies.has("tailwindcss")) {
+    warnings.push(
+      'Detected tailwindcss but no CSS file importing "tailwindcss". Configure tailwindcss.entryPoint manually.',
+    );
+  }
+  return undefined;
+}
+
 async function existingPackageManagers(rootDir: string): Promise<PackageManager[]> {
   const found: PackageManager[] = [];
   for (const [packageManager, lockfile] of packageManagers) {
@@ -340,6 +390,7 @@ export async function detectProject(
     (lockfilePackageManagers.length === 1 ? lockfilePackageManagers[0] : undefined);
   const packageManagerConflicts = lockfilePackageManagers.length > 1 ? lockfilePackageManagers : [];
   const rootEngines = rootManifest?.engines;
+  const tailwindcss = await detectTailwindcssEntryPoint(resolvedRootDir, dependencies, warnings);
 
   return {
     features: {
@@ -352,6 +403,7 @@ export async function detectProject(
           dependencies.has(name),
         ),
       react: dependencies.has("react"),
+      ...(tailwindcss ? { tailwindcss } : {}),
       typescript:
         dependencies.has("typescript") || (await hasRootTypeScriptConfig(resolvedRootDir)),
       vitest: dependencies.has("vitest"),
@@ -384,6 +436,7 @@ export function defaultChoices(detection: IProjectDetection): IInitializationCho
     node: detection.features.node,
     react: detection.features.react || detection.features.nextjs,
     reactPerf: false,
+    ...(detection.features.tailwindcss ? { tailwindcss: detection.features.tailwindcss } : {}),
     test,
     typeAware: false,
     typescript: detection.features.typescript,
@@ -405,6 +458,7 @@ function initializationOptions(choices: IInitializationChoices): IAmamoOptions {
     ...(choices.node ? { node: true } : {}),
     ...(choices.react ? { react: true } : {}),
     ...(choices.reactPerf ? { reactPerf: true } : {}),
+    ...(choices.tailwindcss ? { tailwindcss: { entryPoint: choices.tailwindcss } } : {}),
     ...(choices.test.length === 1 && onlyTest
       ? { test: onlyTest }
       : choices.test.length > 1
@@ -435,6 +489,9 @@ function renderLintOptions(choices: IInitializationChoices): string {
   if (options.node) lines.push("  node: true,");
   if (options.react) lines.push("  react: true,");
   if (options.reactPerf) lines.push("  reactPerf: true,");
+  if (choices.tailwindcss) {
+    lines.push(`  tailwindcss: { entryPoint: ${quote(choices.tailwindcss)} },`);
+  }
   if (options.test) {
     const value =
       typeof options.test === "string"
@@ -539,6 +596,7 @@ function hasReverseSaveActionOrder(source: string): boolean {
 
 function installPackages(choices: IInitializationChoices): string[] {
   const packages = ["@amamo/oxlint-config", "oxlint", "oxfmt"];
+  if (choices.tailwindcss) packages.push("oxlint-tailwindcss");
   if (choices.typeAware) packages.push("oxlint-tsgolint");
   for (const key of experimentalKeys) {
     if (choices.experimental[key]) packages.push(experimentalPackages[key]);

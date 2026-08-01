@@ -133,12 +133,16 @@ function showDetection(detection: IProjectDetection, output: NodeJS.WritableStre
     ["React", detection.features.react],
     ["Next.js", detection.features.nextjs],
     ["Vue", detection.features.vue],
+    ["Tailwind CSS", detection.features.tailwindcss !== undefined],
     ["Node", detection.features.node],
     ["Jest", detection.features.jest],
     ["Vitest", detection.features.vitest],
   ] as const;
   for (const [name, detected] of features) {
     writeLine(output, `  ${name}: ${detected ? "detected" : "not detected"}`);
+  }
+  if (detection.features.tailwindcss) {
+    writeLine(output, `  Tailwind CSS entry point: ${detection.features.tailwindcss}`);
   }
 
   writeLine(output, "Detected experimental packages:");
@@ -197,6 +201,17 @@ async function collectChoices(
   const vue = await askYesNo(lines, output, "Use Vue?", choices.vue);
   if (vue === undefined) return undefined;
   choices.vue = vue;
+
+  if (choices.tailwindcss) {
+    const tailwindcss = await askYesNo(
+      lines,
+      output,
+      `Use Tailwind CSS entry point ${choices.tailwindcss}?`,
+      true,
+    );
+    if (tailwindcss === undefined) return undefined;
+    if (!tailwindcss) delete choices.tailwindcss;
+  }
 
   const node = await askYesNo(lines, output, "Use Node rules?", choices.node);
   if (node === undefined) return undefined;

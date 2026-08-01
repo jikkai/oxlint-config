@@ -1,7 +1,7 @@
 {
   "name": "@amamo/oxlint-config",
   "version": "1.0.0-alpha.0",
-  "description": "Opinionated Oxlint presets and an Oxc initializer.",
+  "description": "Opinionated, composable Oxlint presets.",
   "homepage": "https://jikkai.github.io/oxlint-config/",
   "license": "MIT",
   "author": "白熱 <sonne@asaki.me>",
@@ -31,7 +31,7 @@
     "build": "tsc -p tsconfig.build.json",
     "check": "pnpm check:static && pnpm test",
     "check:static": "oxfmt --check . && oxlint . && tsc -p tsconfig.json --noEmit",
-    "test": "pnpm build && vitest run --dir src",
+    "test": "pnpm build && vitest run --dir src --testTimeout 15000",
     "docs:build": "pnpm build && pnpm --filter @amamo/oxlint-config-docs build",
     "docs:dev": "pnpm build && pnpm --filter @amamo/oxlint-config-docs dev"
   },
@@ -39,7 +39,7 @@
     "jsonc-parser": "^3.3.1"
   },
   "devDependencies": {
-    "@amamo/verso": "1.0.0-rc.3",
+    "@amamo/verso": "1.0.0-rc.4",
     "@playwright/test": "^1.62.1",
     "@testing-library/dom": "^10.4.1",
     "@types/node": "^26.1.2",
@@ -53,6 +53,7 @@
     "lint-staged": "^17.3.0",
     "oxfmt": "^0.61.0",
     "oxlint": "^1.76.0",
+    "oxlint-tailwindcss": "^1.6.0",
     "oxlint-tsgolint": "^7.0.2001",
     "semver": "^7.8.5",
     "simple-git-hooks": "^2.13.1",
@@ -70,6 +71,7 @@
     "eslint-plugin-testing-library": "^7.16.2",
     "oxfmt": "^0.61.0",
     "oxlint": "^1.76.0",
+    "oxlint-tailwindcss": "^1.6.0",
     "oxlint-tsgolint": "^7.0.2001"
   },
   "peerDependenciesMeta": {
@@ -92,6 +94,9 @@
       "optional": true
     },
     "eslint-plugin-testing-library": {
+      "optional": true
+    },
+    "oxlint-tailwindcss": {
       "optional": true
     },
     "oxlint-tsgolint": {

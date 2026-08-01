@@ -118,6 +118,7 @@ describe("detectProject", () => {
         devDependencies: {
           "eslint-plugin-mocha": "*",
           "@jest/globals": "*",
+          tailwindcss: "*",
           typescript: "*",
         },
         engines: { node: ">=22" },
@@ -134,6 +135,7 @@ describe("detectProject", () => {
           vue: "*",
         },
       }),
+      "src/index.css": '@import "tailwindcss";\n',
     });
     const before = await snapshotProject(rootDir);
 
@@ -153,6 +155,7 @@ describe("detectProject", () => {
       nextjs: true,
       node: true,
       react: true,
+      tailwindcss: "src/index.css",
       typescript: true,
       vitest: true,
       vue: true,
@@ -160,6 +163,48 @@ describe("detectProject", () => {
     expect(detection.manifestPaths).toEqual([join(rootDir, "package.json")]);
     expect(detection.warnings).toEqual([]);
     expect(await snapshotProject(rootDir)).toEqual(before);
+  });
+
+  it("ignores non-statement Tailwind imports and detects a single-quoted v4 entry point", async () => {
+    const rootDir = await createProject({
+      "package.json": json({ devDependencies: { tailwindcss: "*" } }),
+      "src/commented.css": '/* @import "tailwindcss"; */\n',
+      "src/content.css": `.demo::before { content: '@import "tailwindcss"'; }\n`,
+      "src/index.css": "@import 'tailwindcss';\n",
+    });
+
+    const detection = await detectProject(rootDir);
+
+    expect(detection.features.tailwindcss).toBe("src/index.css");
+    expect(detection.warnings).toEqual([]);
+  });
+
+  it("does not guess between multiple Tailwind CSS entry points", async () => {
+    const rootDir = await createProject({
+      "apps/admin/index.css": '@import "tailwindcss";\n',
+      "apps/web/index.css": '@import "tailwindcss";\n',
+      "package.json": json({ devDependencies: { tailwindcss: "*" } }),
+    });
+
+    const detection = await detectProject(rootDir);
+
+    expect(detection.features.tailwindcss).toBeUndefined();
+    expect(detection.warnings).toEqual([
+      "Multiple Tailwind CSS entry points detected: apps/admin/index.css, apps/web/index.css. Configure tailwindcss.entryPoint manually.",
+    ]);
+  });
+
+  it("reports a Tailwind CSS dependency without a v4 entry point", async () => {
+    const rootDir = await createProject({
+      "package.json": json({ devDependencies: { tailwindcss: "*" } }),
+    });
+
+    const detection = await detectProject(rootDir);
+
+    expect(detection.features.tailwindcss).toBeUndefined();
+    expect(detection.warnings).toEqual([
+      'Detected tailwindcss but no CSS file importing "tailwindcss". Configure tailwindcss.entryPoint manually.',
+    ]);
   });
 
   it.each([
@@ -377,6 +422,7 @@ describe("defaultChoices", () => {
         nextjs: true,
         node: true,
         react: false,
+        tailwindcss: "src/index.css",
         typescript: true,
         vitest: true,
         vue: true,
@@ -403,6 +449,7 @@ describe("defaultChoices", () => {
       node: true,
       react: true,
       reactPerf: false,
+      tailwindcss: "src/index.css",
       test: ["jest", "vitest"],
       typeAware: false,
       typescript: true,
@@ -423,6 +470,7 @@ describe("createInitializationPlan", () => {
           jest: "*",
           next: "*",
           react: "*",
+          tailwindcss: "*",
           typescript: "*",
           vitest: "*",
           vue: "*",
@@ -430,6 +478,7 @@ describe("createInitializationPlan", () => {
       }),
       "pnpm-lock.yaml": "",
       "pnpm-workspace.yaml": "packages:\n  - packages/*\n",
+      "src/index.css": '@import "tailwindcss";\n',
     });
     const detection = await detectProject(rootDir);
     const detectedChoices = defaultChoices(detection);
@@ -459,6 +508,7 @@ export default amamo({
   node: true,
   react: true,
   reactPerf: true,
+  tailwindcss: { entryPoint: 'src/index.css' },
   test: ['jest', 'vitest'],
   typeAware: true,
   typescript: true,
@@ -496,13 +546,14 @@ export default amamo({
         "@amamo/oxlint-config",
         "oxlint",
         "oxfmt",
+        "oxlint-tailwindcss",
         "oxlint-tsgolint",
         "eslint-plugin-cypress",
         "eslint-plugin-playwright",
       ],
       command: "pnpm",
       display:
-        "pnpm add --save-dev --workspace-root @amamo/oxlint-config oxlint oxfmt oxlint-tsgolint eslint-plugin-cypress eslint-plugin-playwright",
+        "pnpm add --save-dev --workspace-root @amamo/oxlint-config oxlint oxfmt oxlint-tailwindcss oxlint-tsgolint eslint-plugin-cypress eslint-plugin-playwright",
     });
     expect(await snapshotProject(rootDir)).toEqual(before);
   });

@@ -315,6 +315,35 @@ export default amamo({
 });
 
 describe("runCli interactive flow", () => {
+  it("offers the detected Tailwind CSS entry point and preserves an explicit rejection", async () => {
+    const rootDir = await createProject({
+      "package.json": "{}\n",
+      "pnpm-lock.yaml": "lockfileVersion: '9.0'\n",
+      "src/index.css": '@import "tailwindcss";\n',
+    });
+    const { output, text } = captureOutput();
+    const runCommand = vi.fn<RunCommand>();
+    const input = Readable.from([["", "", "", "", "", "n", "", "", "", ""].join("\n") + "\n"]);
+
+    const exitCode = await runCli(["init", "--dry-run"], {
+      cwd: rootDir,
+      env: {},
+      input,
+      inputIsTTY: true,
+      output,
+      outputIsTTY: true,
+      runCommand,
+    });
+
+    expect(exitCode).toBe(0);
+    expect(text()).toContain("Tailwind CSS: detected");
+    expect(text()).toContain("Tailwind CSS entry point: src/index.css");
+    expect(text()).toContain("Use Tailwind CSS entry point src/index.css? [Y/n]");
+    expect(text()).not.toContain("tailwindcss: { entryPoint:");
+    expect(text()).not.toContain("oxlint-tailwindcss");
+    expect(runCommand).not.toHaveBeenCalled();
+  });
+
   it("shows detection and the complete plan before applying confirmed choices", async () => {
     const rootDir = await createProject({
       ".vscode/settings.json": json({ "editor.formatOnSave": true }),

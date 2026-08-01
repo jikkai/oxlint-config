@@ -1,6 +1,7 @@
 import type { OxlintConfig } from "oxlint";
 import { defineConfig } from "oxlint";
 
+import type { ITailwindcssOptions } from "./presets.js";
 import { selectExperimental } from "./experimental.js";
 import {
   base,
@@ -13,6 +14,7 @@ import {
   promise,
   react,
   reactPerf,
+  tailwindcss,
   typescript,
   vitest,
   vue,
@@ -40,6 +42,7 @@ export interface IAmamoOptions {
   react?: boolean;
   reactPerf?: boolean;
   rules?: OxlintConfig["rules"];
+  tailwindcss?: ITailwindcssOptions;
   test?: "jest" | "vitest" | readonly ("jest" | "vitest")[] | false;
   typeAware?: boolean;
   typescript?: boolean;
@@ -72,6 +75,7 @@ export default function amamo(
   if (options.nextjs === true) selected.push(nextjs);
   if (useA11y) selected.push(jsxA11y);
   if (options.vue === true) selected.push(vue);
+  if (options.tailwindcss) selected.push(tailwindcss(options.tailwindcss));
   if (options.node === true) selected.push(node);
   if (options.jsdoc === true) selected.push(jsdoc);
   if (selectedTests.has("jest")) selected.push(jest);
@@ -83,5 +87,6 @@ export default function amamo(
     extends: [...selected, ...overrides],
     ...(options.ignores ? { ignorePatterns: options.ignores } : {}),
     ...(options.typeAware ? { options: { typeAware: true } } : {}),
+    ...(options.tailwindcss ? { settings: { tailwindcss: options.tailwindcss } } : {}),
   });
 }

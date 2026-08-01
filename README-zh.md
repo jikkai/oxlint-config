@@ -21,7 +21,7 @@ export default amamo();
 
 - 常规场景只需一个工厂函数，同时保留具名稳定片段供手动组合。
 - 默认启用 Oxlint 原生的 Base、TypeScript、Import 和 Promise 能力。
-- React、Next.js、Vue、Node、Jest、Vitest、JSDoc 与 React Perf 均显式启用。
+- React、Next.js、Vue、Tailwind CSS、Node、Jest、Vitest、JSDoc 与 React Perf 均显式启用。
 - 可通过 `oxlint-tsgolint` 选择类型感知检查。
 - 可选择七个兼容 ESLint 的 JavaScript 插件适配器。
 - 初始化器会检测依赖与配置特征、预览变更、保留冲突，并只在校验后写入。
@@ -35,12 +35,13 @@ export default amamo();
 
 ## 要求与兼容性
 
-| 要求              | 支持范围    | 说明                                                   |
-| ----------------- | ----------- | ------------------------------------------------------ |
-| Node.js           | `>=22.18`   | 由本包的 `engines` 字段约束。                          |
-| `oxlint`          | `^1.76.0`   | 必需 peer dependency，也是原生插件的来源。             |
-| `oxfmt`           | `^0.61.0`   | 必需 peer dependency，供初始化器生成的格式化流程使用。 |
-| `oxlint-tsgolint` | `^7.0.2001` | 可选；只在启用 `typeAware` 时需要。                    |
+| 要求                 | 支持范围    | 说明                                                   |
+| -------------------- | ----------- | ------------------------------------------------------ |
+| Node.js              | `>=22.18`   | 由本包的 `engines` 字段约束。                          |
+| `oxlint`             | `^1.76.0`   | 必需 peer dependency，也是原生插件的来源。             |
+| `oxfmt`              | `^0.61.0`   | 必需 peer dependency，供初始化器生成的格式化流程使用。 |
+| `oxlint-tailwindcss` | `^1.6.0`    | 可选；仅在配置 `tailwindcss` 时需要。                  |
+| `oxlint-tsgolint`    | `^7.0.2001` | 可选；只在启用 `typeAware` 时需要。                    |
 
 当初始化器能够安全识别唯一包管理器时，它支持 pnpm、npm、Yarn 和 Bun 项目。本仓库开发使用
 pnpm `11.18.0`。
@@ -139,12 +140,13 @@ Oxlint 支持的修复，`format` 则独立运行 Oxfmt。
 | Next.js                      | 关闭               | 使用 `nextjs: true` 启用；同时选择 React 与 JSX A11y。   |
 | JSX A11y                     | 跟随 React/Next.js | 显式设置 `jsxA11y` 可覆盖推导值。                        |
 | Vue、Node、JSDoc、React Perf | 关闭               | 分别通过同名布尔选项启用。                               |
+| Tailwind CSS                 | 关闭               | 通过 `tailwindcss` 传入 Tailwind CSS v4 入口文件。       |
 | Jest、Vitest                 | 关闭               | 通过 `test` 选择一个或两个；重复值会被忽略。             |
 | 类型感知模式                 | 关闭               | 安装 `oxlint-tsgolint` 后设置 `typeAware: true`。        |
 | 实验适配器                   | 关闭               | 每个适配器都需要安装并显式选择。                         |
 
-预设顺序是确定的：Base、默认原生片段、React 相关片段、Vue、Node、JSDoc、测试、实验适配器、
-`options.rules`，最后是任意额外 override。
+预设顺序是确定的：Base、默认原生片段、React 相关片段、Vue、Tailwind CSS、Node、JSDoc、测试、
+实验适配器、`options.rules`，最后是任意额外 override。
 
 ## 选项参考
 
@@ -167,6 +169,7 @@ function amamo(options?: IAmamoOptions, ...overrides: OxlintConfig[]): OxlintCon
 | `react`        | `boolean`                                                        | `false`            | 选择 React 规则，并隐式选择 JSX A11y。       |
 | `reactPerf`    | `boolean`                                                        | `false`            | 选择明确的 React 分配性能警告。              |
 | `rules`        | `OxlintConfig["rules"]`                                          | `undefined`        | 在所选预设之后加入根级规则配置。             |
+| `tailwindcss`  | `ITailwindcssOptions`                                            | `undefined`        | 以显式 v4 入口启用 `oxlint-tailwindcss`。    |
 | `test`         | `"jest" \| "vitest" \| readonly ("jest" \| "vitest")[] \| false` | `false`            | 选择一个或两个测试运行器片段。               |
 | `typeAware`    | `boolean`                                                        | `false`            | 设置根级 `options.typeAware`。               |
 | `typescript`   | `boolean`                                                        | `true`             | 选择 TypeScript 片段。                       |
@@ -277,6 +280,27 @@ export default defineConfig({ extends: [base, typescript, node] });
 `vue: true` 为 `*.vue` 的脚本内容选择 Oxlint 原生 Vue 插件并启用 Vue 环境。它不会添加针对
 模板的 JavaScript 插件规则。
 
+### Tailwind CSS
+
+安装可选插件，并传入导入 Tailwind CSS v4 的 CSS 文件：
+
+```sh
+pnpm add --save-dev oxlint-tailwindcss
+```
+
+```ts
+import amamo from "@amamo/oxlint-config";
+
+export default amamo({
+  tailwindcss: { entryPoint: "src/index.css" },
+});
+```
+
+在 monorepo 中，`entryPoint` 也接受有序的 `{ files, use }` 映射。该预设启用一组核心规则；
+严重级别可通过 `rules` 调整。不支持 Tailwind CSS v3，详情参见
+[oxlint-tailwindcss 配置指南](https://oxlint-tailwindcss.pages.dev/setup)。它通过 Oxlint 的
+JavaScript 插件 API 运行，因此该上游 API 仍处于 Alpha 阶段。
+
 ### Node
 
 `node: true` 会把 Node 环境和 Node 规则应用到 JavaScript 与 TypeScript 脚本文件 pattern，
@@ -379,6 +403,8 @@ export default amamo({
 
 - TypeScript：存在 `typescript` 依赖、根级 `tsconfig.json` 或根级 `tsconfig.*.json`。
 - React、Next.js、Vue、Jest、Vitest：存在对应 package dependency。
+- Tailwind CSS：项目中只有一个导入 `"tailwindcss"` 的 CSS 文件。多个或缺失的 v4 入口会被
+  报告，并留给用户手动配置。
 - Node：根 `engines.node` 字段，或已知服务端包（`express`、`fastify`、`hono`、`koa`、
   `@nestjs/core`）。仅有 `@types/node` 不会启用 Node 规则。
 - Storybook：存在 `storybook`、`eslint-plugin-storybook` 或 `@storybook/` 下的包；其他
@@ -473,7 +499,7 @@ Svelte 或 Astro 专用预设，不会增加 template 规则，也不承诺检�
 - Enabled 与 All 规则视图；All 会在活跃规则应用之外加入未启用的原生规则清单。
 - 搜索，以及 plugin、preset、severity、state、scope 过滤器。
 - Rules、Presets、Scopes 和生成的 Config 四个视图。
-- 规则严重级别、来源 preset/plugin、作用域、选项、原生 schema、实验描述与官方文档链接。
+- 规则严重级别、来源 preset/plugin、作用域、选项、原生 schema、外部插件描述与官方文档链接。
 - 中英文界面、可分享 URL 状态、浏览器历史恢复，以及桌面/移动端布局。
 
 构建快照具有确定性，包含 package 与 Oxlint 版本，但不包含生成时间戳。
@@ -485,6 +511,7 @@ Svelte 或 Astro 专用预设，不会增加 template 规则，也不承诺检�
   策略。
 - JavaScript 插件适配器与 Oxlint JS plugin API 均为 Alpha。适配器兼容性只针对上表中的
   peer range 测试。
+- Tailwind CSS lint 只支持 v4，并依赖 `oxlint-tailwindcss` 与 Oxlint 的 Alpha JS plugin API。
 - 类型感知模式依赖 `oxlint-tsgolint` 及其上游 TypeScript 兼容性。
 - 初始化器会保留冲突，不会进行破坏性猜测；在已有仓库批准写入前仍应检查每项计划。
 

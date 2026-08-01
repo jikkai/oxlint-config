@@ -43,6 +43,7 @@ const presetLabels: Record<PresetKey, Parameters<typeof translate>[1]> = {
   regexp: "presetRegexp",
   sonarjs: "presetSonarjs",
   storybook: "presetStorybook",
+  tailwindcss: "presetTailwindcss",
   testingLibrary: "presetTestingLibrary",
   typeAware: "presetTypeAware",
   typescript: "presetTypescript",
@@ -56,7 +57,7 @@ const groups: ReadonlyArray<{
 }> = [
   { keys: ["base", "typescript", "imports", "promise"], label: "groupDefaults" },
   {
-    keys: ["react", "reactPerf", "nextjs", "jsxA11y", "vue"],
+    keys: ["react", "reactPerf", "nextjs", "jsxA11y", "vue", "tailwindcss"],
     label: "groupFrameworks",
   },
   { keys: ["jest", "vitest"], label: "groupTests" },
@@ -100,7 +101,7 @@ export function ConfigurationSidebar({
                 {group.keys.map((key) => {
                   const lockedByNext = key === "react" && config.nextjs;
                   const disabled = key === "base" || lockedByNext;
-                  const experimental = group.label === "groupExperimental";
+                  const experimental = group.label === "groupExperimental" || key === "tailwindcss";
                   const checked = isPresetEnabled(config, key);
 
                   return (

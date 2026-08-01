@@ -80,7 +80,7 @@ export function RuleDetail({ locale, row, schemaDefinitions }: IRuleDetailProps)
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs text-muted-foreground">{translate(locale, "ruleDetailsTitle")}</p>
-          <h2 className="break-words font-mono text-base font-semibold">{row.rule}</h2>
+          <h2 className="font-mono text-base font-semibold wrap-break-word">{row.rule}</h2>
         </div>
         {row.external ? <Badge variant="outline">{translate(locale, "alpha")}</Badge> : null}
       </div>

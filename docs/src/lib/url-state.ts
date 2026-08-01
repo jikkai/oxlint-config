@@ -31,6 +31,7 @@ const presetTokenByKey: Readonly<Partial<Record<PresetKey, string>>> = {
   regexp: "regexp",
   sonarjs: "sonarjs",
   storybook: "storybook",
+  tailwindcss: "tailwindcss",
   testingLibrary: "testing-library",
   typeAware: "type-aware",
   typescript: "typescript",

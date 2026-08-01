@@ -1,5 +1,25 @@
 import { defineConfig } from "oxlint";
 
+export interface ITailwindcssEntryPoint {
+  files: string | readonly string[];
+  use: string;
+}
+
+export interface ITailwindcssClassDetectionOptions {
+  attributes?: readonly string[];
+  callees?: readonly string[];
+  tags?: readonly string[];
+  variablePatterns?: readonly string[];
+}
+
+export interface ITailwindcssOptions extends ITailwindcssClassDetectionOptions {
+  debug?: boolean;
+  entryPoint: string | readonly ITailwindcssEntryPoint[];
+  exclude?: ITailwindcssClassDetectionOptions;
+  rootFontSize?: number;
+  timeout?: number;
+}
+
 export const scriptFiles = ["**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}"];
 export const typescriptFiles = ["**/*.{ts,tsx,mts,cts}"];
 export const jsxFiles = ["**/*.{jsx,tsx}"];
@@ -126,6 +146,25 @@ export const vue = defineConfig({
     },
   ],
 });
+
+export function tailwindcss(options: ITailwindcssOptions) {
+  return defineConfig({
+    jsPlugins: ["oxlint-tailwindcss"],
+    rules: {
+      "tailwindcss/no-conflicting-classes": "error",
+      "tailwindcss/no-deprecated-classes": "error",
+      "tailwindcss/no-duplicate-classes": "warn",
+      "tailwindcss/no-unknown-classes": "error",
+      "tailwindcss/enforce-canonical": "warn",
+      "tailwindcss/no-unnecessary-arbitrary-value": "warn",
+      "tailwindcss/enforce-sort-order": "warn",
+      "tailwindcss/consistent-variant-order": "warn",
+      "tailwindcss/enforce-consistent-important-position": "warn",
+      "tailwindcss/no-unnecessary-whitespace": "warn",
+    },
+    settings: { tailwindcss: options },
+  });
+}
 
 export const node = defineConfig({
   plugins: ["node"],

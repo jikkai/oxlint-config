@@ -9,6 +9,7 @@ export default amamo({
   promise: true,
   react: true,
   reactPerf: true,
+  tailwindcss: { entryPoint: "fixtures/stable/tailwindcss/styles.css" },
   test: ["jest", "vitest"],
   typeAware: true,
   typescript: true,

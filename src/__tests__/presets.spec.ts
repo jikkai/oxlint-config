@@ -15,6 +15,7 @@ import {
   promise,
   react,
   reactPerf,
+  tailwindcss,
   typescript,
   vitest,
   vue,
@@ -37,6 +38,7 @@ interface IStableFixture {
   invalid: string;
   name: string;
   plugin?: string;
+  printConfig?: boolean;
   rule: string;
   valid: string;
 }
@@ -109,6 +111,14 @@ const stableFixtures: readonly IStableFixture[] = [
     rule: "vitest/no-focused-tests",
     valid: "vitest/valid.spec.ts",
   },
+  {
+    diagnostic: "tailwindcss(no-unknown-classes)",
+    invalid: "tailwindcss/invalid.ts",
+    name: "Tailwind CSS",
+    printConfig: false,
+    rule: "tailwindcss/no-unknown-classes",
+    valid: "tailwindcss/valid.ts",
+  },
 ];
 
 function runOxlint(...args: string[]) {
@@ -179,28 +189,39 @@ describe("stable defaults", () => {
     expect(vitest.plugins).toEqual(["vitest"]);
   });
 
+  it("creates a Tailwind CSS plugin preset with its explicit entry point", () => {
+    const preset = tailwindcss({ entryPoint: "src/index.css" });
+
+    expect(preset.jsPlugins).toEqual(["oxlint-tailwindcss"]);
+    expect(preset.settings).toEqual({
+      tailwindcss: { entryPoint: "src/index.css" },
+    });
+  });
+
   it.each(stableFixtures)(
     "$name exposes and enforces its real native fixture rule",
-    ({ diagnostic, env, invalid, plugin, rule, valid }) => {
+    ({ diagnostic, env, invalid, plugin, printConfig = true, rule, valid }) => {
       const config = "fixtures/stable.config.mjs";
       const invalidFile = `fixtures/stable/${invalid}`;
       const validFile = `fixtures/stable/${valid}`;
-      const printed = runOxlint("--config", config, "--print-config", invalidFile);
+      if (printConfig) {
+        const printed = runOxlint("--config", config, "--print-config", invalidFile);
 
-      expect(printed.status).toBe(0);
-      if (printed.status !== 0) throw new Error(printed.stderr);
+        expect(printed.status).toBe(0);
+        if (printed.status !== 0) throw new Error(printed.stderr);
 
-      const printedConfig = JSON.parse(printed.stdout) as IPrintedConfig;
-      const ruleValues = [
-        printedConfig.rules?.[rule],
-        ...(printedConfig.overrides?.map((override) => override.rules?.[rule]) ?? []),
-      ].map((value) => (Array.isArray(value) ? value[0] : value));
-      expect(ruleValues).toContain("deny");
-      if (plugin !== undefined) expect(printedConfig.plugins).toContain(plugin);
-      if (env !== undefined) {
-        expect(printedConfig.overrides).toEqual(
-          expect.arrayContaining([expect.objectContaining({ env: { [env]: true } })]),
-        );
+        const printedConfig = JSON.parse(printed.stdout) as IPrintedConfig;
+        const ruleValues = [
+          printedConfig.rules?.[rule],
+          ...(printedConfig.overrides?.map((override) => override.rules?.[rule]) ?? []),
+        ].map((value) => (Array.isArray(value) ? value[0] : value));
+        expect(ruleValues).toContain("deny");
+        if (plugin !== undefined) expect(printedConfig.plugins).toContain(plugin);
+        if (env !== undefined) {
+          expect(printedConfig.overrides).toEqual(
+            expect.arrayContaining([expect.objectContaining({ env: { [env]: true } })]),
+          );
+        }
       }
 
       const invalidResult = runOxlint(

@@ -1,4 +1,9 @@
 export type { IAmamoOptions, IExperimentalOptions } from "./config.js";
+export type {
+  ITailwindcssClassDetectionOptions,
+  ITailwindcssEntryPoint,
+  ITailwindcssOptions,
+} from "./presets.js";
 export { default } from "./config.js";
 export {
   base,

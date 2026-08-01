@@ -21,7 +21,7 @@ can install both tools and prepare a project without replacing an existing lint 
 
 - One factory for the common path, plus named stable fragments for manual composition.
 - A default baseline for Oxlint's native Base, TypeScript, Import, and Promise plugins.
-- Explicit React, Next.js, Vue, Node, Jest, Vitest, JSDoc, and React Perf integrations.
+- Explicit React, Next.js, Vue, Tailwind CSS, Node, Jest, Vitest, JSDoc, and React Perf integrations.
 - Optional type-aware linting through `oxlint-tsgolint`.
 - Opt-in adapters for seven ESLint-compatible JavaScript plugins.
 - A project initializer that detects dependency and config signals, previews changes, preserves
@@ -37,12 +37,13 @@ can install both tools and prepare a project without replacing an existing lint 
 
 ## Requirements and Compatibility
 
-| Requirement       | Supported range | Notes                                                                   |
-| ----------------- | --------------- | ----------------------------------------------------------------------- |
-| Node.js           | `>=22.18`       | Enforced by this package's `engines` field.                             |
-| `oxlint`          | `^1.76.0`       | Required peer dependency and source of native plugins.                  |
-| `oxfmt`           | `^0.61.0`       | Required peer dependency used by the initializer's formatting workflow. |
-| `oxlint-tsgolint` | `^7.0.2001`     | Optional; required only when `typeAware` is enabled.                    |
+| Requirement          | Supported range | Notes                                                                   |
+| -------------------- | --------------- | ----------------------------------------------------------------------- |
+| Node.js              | `>=22.18`       | Enforced by this package's `engines` field.                             |
+| `oxlint`             | `^1.76.0`       | Required peer dependency and source of native plugins.                  |
+| `oxfmt`              | `^0.61.0`       | Required peer dependency used by the initializer's formatting workflow. |
+| `oxlint-tailwindcss` | `^1.6.0`        | Optional; required only when `tailwindcss` is configured.               |
+| `oxlint-tsgolint`    | `^7.0.2001`     | Optional; required only when `typeAware` is enabled.                    |
 
 The initializer supports pnpm, npm, Yarn, and Bun projects when it can identify one package
 manager safely. Repository development uses pnpm `11.18.0`.
@@ -142,12 +143,14 @@ disabled. Other integrations are opt-in, with React and Next.js dependency rules
 | Next.js                      | Off                   | Enable with `nextjs: true`; also selects React and JSX A11y.                       |
 | JSX A11y                     | Follows React/Next.js | Set `jsxA11y` explicitly to override the derived value.                            |
 | Vue, Node, JSDoc, React Perf | Off                   | Enable each with its matching boolean option.                                      |
+| Tailwind CSS                 | Off                   | Pass its required Tailwind CSS v4 entry point through `tailwindcss`.               |
 | Jest, Vitest                 | Off                   | Select one or both through `test`. Duplicate entries are ignored.                  |
 | Type-aware mode              | Off                   | Enable with `typeAware: true` after installing `oxlint-tsgolint`.                  |
 | Experimental adapters        | Off                   | Each adapter must be installed and explicitly selected.                            |
 
 Preset order is deterministic: Base, default native fragments, React-related fragments, Vue,
-Node, JSDoc, tests, experimental adapters, `options.rules`, then arbitrary trailing overrides.
+Tailwind CSS, Node, JSDoc, tests, experimental adapters, `options.rules`, then arbitrary trailing
+overrides.
 
 ## Options Reference
 
@@ -170,6 +173,7 @@ function amamo(options?: IAmamoOptions, ...overrides: OxlintConfig[]): OxlintCon
 | `react`        | `boolean`                                                        | `false`             | Selects React rules and implies JSX A11y.                     |
 | `reactPerf`    | `boolean`                                                        | `false`             | Selects explicit React allocation warnings.                   |
 | `rules`        | `OxlintConfig["rules"]`                                          | `undefined`         | Adds root rule settings after selected presets.               |
+| `tailwindcss`  | `ITailwindcssOptions`                                            | `undefined`         | Enables `oxlint-tailwindcss` with an explicit v4 entry point. |
 | `test`         | `"jest" \| "vitest" \| readonly ("jest" \| "vitest")[] \| false` | `false`             | Selects one or both test-runner fragments.                    |
 | `typeAware`    | `boolean`                                                        | `false`             | Sets root `options.typeAware`.                                |
 | `typescript`   | `boolean`                                                        | `true`              | Selects the TypeScript fragment.                              |
@@ -280,6 +284,27 @@ runtime; the option or initializer-generated config is the source of truth.
 `vue: true` selects Oxlint's native Vue plugin for `*.vue` script content and enables the Vue
 environment. It does not add template-specific JavaScript-plugin rules.
 
+### Tailwind CSS
+
+Install the optional plugin and pass the CSS file that imports Tailwind CSS v4:
+
+```sh
+pnpm add --save-dev oxlint-tailwindcss
+```
+
+```ts
+import amamo from "@amamo/oxlint-config";
+
+export default amamo({
+  tailwindcss: { entryPoint: "src/index.css" },
+});
+```
+
+For monorepos, `entryPoint` also accepts ordered `{ files, use }` mappings. The preset enables a
+focused set of the plugin's rules; use `rules` for severity changes. Tailwind CSS v3 is not supported.
+See the [oxlint-tailwindcss setup guide](https://oxlint-tailwindcss.pages.dev/setup). Because it runs
+through Oxlint's JavaScript plugin API, that upstream API remains Alpha.
+
 ### Node
 
 `node: true` applies the Node environment and Node rules to JavaScript and TypeScript script-file
@@ -385,6 +410,8 @@ It derives project choices from dependencies and a small set of config signals:
 - TypeScript from a `typescript` dependency, a root `tsconfig.json`, or a root
   `tsconfig.*.json`.
 - React, Next.js, Vue, Jest, and Vitest from their package dependencies.
+- Tailwind CSS from one unambiguous project CSS file importing `"tailwindcss"`; multiple or missing
+  v4 entry points are reported and left for manual configuration.
 - Node from the root `engines.node` field or known server packages (`express`, `fastify`, `hono`,
   `koa`, or `@nestjs/core`). `@types/node` alone does not enable Node rules.
 - Storybook from `storybook`, `eslint-plugin-storybook`, or a package under `@storybook/`; other
@@ -486,8 +513,8 @@ It provides:
 - Enabled and All rule views, where All adds disabled native inventory to active applications.
 - Search plus plugin, preset, severity, state, and scope filters.
 - Rules, Presets, Scopes, and generated Config views.
-- Rule severities, source preset/plugin, scopes, options, native schemas, experimental descriptions,
-  and official documentation links.
+- Rule severities, source preset/plugin, scopes, options, native schemas, external-plugin
+  descriptions, and official documentation links.
 - English and Chinese UI, shareable URL state, browser history restoration, and desktop/mobile
   layouts.
 
@@ -501,6 +528,8 @@ timestamp.
   no additional stable-rule SemVer policy is claimed.
 - JavaScript plugin adapters and Oxlint's JS plugin API are Alpha. Adapter compatibility is tested
   only against the peer ranges listed above.
+- Tailwind CSS linting supports v4 only and depends on `oxlint-tailwindcss` plus Oxlint's Alpha JS
+  plugin API.
 - Type-aware mode depends on `oxlint-tsgolint` and upstream TypeScript compatibility.
 - The initializer preserves conflicts instead of making destructive guesses, but review every plan
   before approving writes in an established repository.

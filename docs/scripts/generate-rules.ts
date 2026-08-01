@@ -5,6 +5,8 @@ import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import tailwindcssPlugin from "oxlint-tailwindcss";
+
 import type {
   IRuleApplication,
   IRuleInventoryItem,
@@ -494,6 +496,61 @@ export async function generateRuleSnapshot(): Promise<IRuleSnapshot> {
     for (const [preset, contribution] of contributions) {
       presets[preset] = applicationsForContribution(preset, contribution);
     }
+
+    const packageModule = (await import(packageEntryUrl)) as Record<string, unknown>;
+    const createConfig = packageModule.default;
+    if (typeof createConfig !== "function") {
+      throw new Error("Built package does not export the config factory");
+    }
+    const tailwindcssConfig = createConfig({
+      imports: false,
+      promise: false,
+      tailwindcss: { entryPoint: "docs/src/index.css" },
+      typescript: false,
+    }) as unknown;
+    const tailwindcssPresets =
+      isRecord(tailwindcssConfig) && Array.isArray(tailwindcssConfig.extends)
+        ? tailwindcssConfig.extends
+        : [];
+    const tailwindcssPreset = tailwindcssPresets.find(
+      (preset) =>
+        isRecord(preset) &&
+        Array.isArray(preset.jsPlugins) &&
+        preset.jsPlugins.includes("oxlint-tailwindcss"),
+    );
+    if (
+      !isRecord(tailwindcssPreset) ||
+      !Array.isArray(tailwindcssPreset.jsPlugins) ||
+      !tailwindcssPreset.jsPlugins.includes("oxlint-tailwindcss") ||
+      !isRecord(tailwindcssPreset.rules)
+    ) {
+      throw new Error("Malformed Tailwind CSS preset: expected plugin and rules metadata");
+    }
+    const tailwindcssRules = normalizeRuleMap(tailwindcssPreset.rules);
+    if (
+      Object.keys(tailwindcssRules).length !== 10 ||
+      Object.keys(tailwindcssRules).some((rule) => !rule.startsWith("tailwindcss/"))
+    ) {
+      throw new Error("Tailwind CSS preset must configure exactly ten prefixed rules");
+    }
+    presets.tailwindcss = Object.entries(tailwindcssRules).map(([rule, setting]) => {
+      const ruleName = rule.slice("tailwindcss/".length);
+      const description = tailwindcssPlugin.rules[ruleName]?.meta?.docs?.description;
+      if (typeof description !== "string") {
+        throw new Error(`Tailwind CSS rule ${rule} is missing a metadata description`);
+      }
+      return {
+        description,
+        docsUrl: `https://oxlint-tailwindcss.pages.dev/rules/${ruleName}`,
+        external: true,
+        options: setting.options,
+        plugin: "tailwindcss",
+        preset: "tailwindcss",
+        rule,
+        scopes: [],
+        severity: setting.severity,
+      };
+    });
 
     const experimentalPrint = await runPrintConfig(
       resolve(repositoryRoot, "fixtures/experimental.config.mjs"),

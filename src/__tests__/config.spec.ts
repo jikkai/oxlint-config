@@ -20,6 +20,31 @@ describe("amamo", () => {
     expect(config.options).toEqual({ typeAware: true });
   });
 
+  it("configures Tailwind CSS through oxlint-tailwindcss", () => {
+    const tailwindcss = {
+      attributes: ["tw"],
+      entryPoint: [
+        { files: ["apps/web/**", "packages/ui/**"], use: "apps/web/src/index.css" },
+        { files: "**", use: "src/index.css" },
+      ],
+      exclude: { callees: ["objstr"] },
+      timeout: 120_000,
+    };
+
+    const config = amamo({ tailwindcss });
+    const selected = config.extends?.find((preset) =>
+      preset.jsPlugins?.includes("oxlint-tailwindcss"),
+    );
+
+    expect(config.settings).toEqual({ tailwindcss });
+    expect(selected?.settings).toEqual({ tailwindcss });
+    expect(selected?.rules).toMatchObject({
+      "tailwindcss/no-conflicting-classes": "error",
+      "tailwindcss/no-unknown-classes": "error",
+      "tailwindcss/enforce-sort-order": "warn",
+    });
+  });
+
   it("places user rules before arbitrary overrides", () => {
     const override = { rules: { eqeqeq: "off" as const } };
     const config = amamo({ rules: { eqeqeq: "error" } }, override);

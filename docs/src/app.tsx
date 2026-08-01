@@ -73,6 +73,7 @@ const presetNames: Record<PresetKey, Parameters<typeof translate>[1]> = {
   regexp: "presetRegexp",
   sonarjs: "presetSonarjs",
   storybook: "presetStorybook",
+  tailwindcss: "presetTailwindcss",
   testingLibrary: "presetTestingLibrary",
   typeAware: "presetTypeAware",
   typescript: "presetTypescript",
@@ -489,6 +490,7 @@ export function App() {
                             "regexp",
                             "sonarjs",
                             "storybook",
+                            "tailwindcss",
                             "testingLibrary",
                           ].includes(preset) ? (
                             <Badge variant="outline">{translate(explorer.lang, "alpha")}</Badge>
@@ -545,7 +547,7 @@ export function App() {
                     <article className="summary-row" key={scope.id}>
                       <div className="min-w-0">
                         <h3>{name}</h3>
-                        <p className="break-words font-mono text-xs text-muted-foreground">
+                        <p className="font-mono text-xs wrap-break-word text-muted-foreground">
                           {scope.scopes.length === 0 ? "./" : scope.scopes.join(", ")}
                         </p>
                       </div>
