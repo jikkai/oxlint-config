@@ -433,6 +433,7 @@ export default amamo({
 | `package.json`            | 只添加缺失的 `lint`、`lint:fix`、`format`、`format:check` script。                                   |
 | `.vscode/settings.json`   | 只在能够安全合并时，依次添加 Oxfmt 与 Oxlint save action。                                           |
 | `.vscode/extensions.json` | 添加 `oxc.oxc-vscode` 推荐项，不移除已有内容。                                                       |
+| `.zed/settings.json`      | 为 Oxc 扩展支持的语言添加保存时 Oxfmt 格式化与 Oxlint 安全修复。                                     |
 | 开发依赖                  | 安装本包、Oxlint、Oxfmt，以及仅被选择的可选引擎或适配器。                                            |
 
 如果已有 lint config，初始化器会保留它，并输出一段组合示例。JSONC 修改会尽可能保留注释和
@@ -466,6 +467,30 @@ export default amamo({
 这样保存时会先通过 Oxfmt 格式化，再应用 Oxlint fix。如果两个 key 已经以相反顺序存在，初始化器
 会报告冲突，并保持文件逐字节不变。编辑器的类型感知行为跟随根 Oxlint 配置；详情参见官方
 [编辑器设置指南](https://oxc.rs/docs/guide/usage/linter/editors.html)。
+
+## Zed 保存格式化与安全修复
+
+初始化器会让 Zed 安装 [Oxc 扩展](https://zed.dev/extensions/oxc)，并为扩展支持的语言写入项目
+设置。JavaScript、JSX、TypeScript、TSX、Vue 与 Svelte 会先运行 Oxfmt，再应用 Oxlint 安全修复；
+Astro 只运行其支持的 Oxlint 修复，其他受支持的数据与标记语言只运行 Oxfmt。已有设置会安全合并，
+不会替换用户值。
+
+```json
+{
+  "languages": {
+    "TypeScript": {
+      "format_on_save": "on",
+      "formatter": [
+        { "language_server": { "name": "oxfmt" } },
+        { "code_action": "source.fixAll.oxc" }
+      ]
+    }
+  }
+}
+```
+
+如果已有 `fixKind` 允许不安全修复，或已有 formatter 顺序先执行 Oxlint 再执行 Oxfmt，初始化器
+会保留原文件并报告冲突。
 
 ## Oxfmt 与 Prettier 的边界
 
@@ -539,7 +564,7 @@ React 会推导出 `jsxA11y: true`，Next.js 又会推导 React。显式设置 `
 
 ### 这个包会格式化代码吗？
 
-不会。它负责配置 Oxlint。推荐流程和 VS Code save action 会单独安装并调用 Oxfmt。
+不会。它负责配置 Oxlint。推荐流程和编辑器 save action 会单独安装并调用 Oxfmt。
 
 ### 初始化器会覆盖已有配置或 script 吗？
 

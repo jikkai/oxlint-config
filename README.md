@@ -440,6 +440,7 @@ boolean flags are rejected with usage text.
 | `package.json`            | Adds only missing `lint`, `lint:fix`, `format`, and `format:check` scripts.                                        |
 | `.vscode/settings.json`   | Adds Oxfmt then Oxlint save actions only when they can be merged safely.                                           |
 | `.vscode/extensions.json` | Adds the `oxc.oxc-vscode` recommendation without removing existing entries.                                        |
+| `.zed/settings.json`      | Adds Oxfmt formatting and safe Oxlint fixes on save for languages supported by the Oxc extension.                  |
 | Development dependencies  | Installs the package, Oxlint, Oxfmt, and only selected optional engines/adapters.                                  |
 
 If a lint config already exists, it is preserved and the command prints a composition snippet
@@ -478,6 +479,31 @@ This provides save formatting through Oxfmt and then applies Oxlint fixes. If bo
 exist in reverse order, the initializer reports a conflict and preserves the file byte-for-byte.
 Editor type-aware behavior follows the root Oxlint config; see the official
 [editor setup guide](https://oxc.rs/docs/guide/usage/linter/editors.html).
+
+## Zed Save Formatting and Safe Fixes
+
+The initializer asks Zed to install the [Oxc extension](https://zed.dev/extensions/oxc) and writes
+project settings for every language it supports. JavaScript, JSX, TypeScript, TSX, Vue, and Svelte
+run Oxfmt followed by safe Oxlint fixes; Astro runs only the supported Oxlint fixes. Other supported
+data and markup languages run Oxfmt only. Existing settings are merged without replacing user
+values.
+
+```json
+{
+  "languages": {
+    "TypeScript": {
+      "format_on_save": "on",
+      "formatter": [
+        { "language_server": { "name": "oxfmt" } },
+        { "code_action": "source.fixAll.oxc" }
+      ]
+    }
+  }
+}
+```
+
+The initializer preserves the file and reports a conflict when an existing `fixKind` permits unsafe
+fixes or an existing formatter sequence runs Oxlint before Oxfmt.
 
 ## Oxfmt and Prettier Boundary
 
@@ -559,7 +585,7 @@ that dependency.
 ### Does this package format code?
 
 No. It configures Oxlint. Oxfmt is installed and invoked separately by the recommended workflow and
-VS Code save action.
+editor save actions.
 
 ### Will the initializer overwrite my existing config or scripts?
 

@@ -18,12 +18,11 @@ import {
 } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
-import type { ParseError } from "jsonc-parser";
-import { parse } from "jsonc-parser";
-
 import type { IAmamoOptions, IExperimentalOptions } from "./config.js";
 import type { IJsoncMergeResult, JsoncOperation } from "./jsonc.js";
 import { experimentalPackages } from "./experimental.js";
+import { createVSCodeInitializationPlan } from "./initializer/vscode.js";
+import { createZedInitializationPlan } from "./initializer/zed.js";
 import { applyJsoncOperations } from "./jsonc.js";
 
 export type PackageManager = "bun" | "npm" | "pnpm" | "yarn";
@@ -129,26 +128,6 @@ const scriptOperations = [
   { kind: "setIfMissing", path: ["scripts", "lint:fix"], value: "oxlint --fix ." },
   { kind: "setIfMissing", path: ["scripts", "format"], value: "oxfmt ." },
   { kind: "setIfMissing", path: ["scripts", "format:check"], value: "oxfmt --check ." },
-] as const satisfies readonly JsoncOperation[];
-
-const settingsOperations = [
-  { kind: "setIfMissing", path: ["editor.formatOnSave"], value: false },
-  {
-    before: "source.fixAll.oxc",
-    kind: "setIfMissing",
-    path: ["editor.codeActionsOnSave", "source.format.oxc"],
-    value: "always",
-  },
-  {
-    kind: "setIfMissing",
-    path: ["editor.codeActionsOnSave", "source.fixAll.oxc"],
-    value: "always",
-  },
-] as const satisfies readonly JsoncOperation[];
-
-const extensionOperations = [
-  { kind: "setIfMissing", path: ["recommendations"], value: [] },
-  { kind: "appendUnique", path: ["recommendations"], value: "oxc.oxc-vscode" },
 ] as const satisfies readonly JsoncOperation[];
 
 function isJsonObject(value: unknown): value is JsonObject {
@@ -578,22 +557,6 @@ function collectJsoncPlan(
   });
 }
 
-function hasReverseSaveActionOrder(source: string): boolean {
-  const errors: ParseError[] = [];
-  const parsed: unknown = parse(source, errors, {
-    allowTrailingComma: true,
-    disallowComments: false,
-  });
-  if (errors.length > 0 || !isJsonObject(parsed)) return false;
-  const actions = parsed["editor.codeActionsOnSave"];
-  if (!isJsonObject(actions)) return false;
-
-  const keys = Object.keys(actions);
-  const formatIndex = keys.indexOf("source.format.oxc");
-  const fixIndex = keys.indexOf("source.fixAll.oxc");
-  return formatIndex !== -1 && fixIndex !== -1 && formatIndex > fixIndex;
-}
-
 function installPackages(choices: IInitializationChoices): string[] {
   const packages = ["@amamo/oxlint-config", "oxlint", "oxfmt"];
   if (choices.tailwindcss) packages.push("oxlint-tailwindcss");
@@ -680,35 +643,15 @@ export async function createInitializationPlan(
     );
   }
 
-  const settingsPath = ".vscode/settings.json";
-  const settingsFile = await readOptionalFile(join(rootDir, settingsPath), "{}\n");
-  if (settingsFile.existed && hasReverseSaveActionOrder(settingsFile.content)) {
-    conflicts.push(
-      `${settingsPath}: source.format.oxc must precede source.fixAll.oxc; existing bytes preserved`,
-    );
-  } else {
-    collectJsoncPlan(
-      rootDir,
-      settingsPath,
-      settingsFile,
-      applyJsoncOperations(settingsFile.content, settingsOperations),
-      files,
-      conflicts,
-      notices,
-    );
+  const editorPlans = await Promise.all([
+    createVSCodeInitializationPlan(rootDir),
+    createZedInitializationPlan(rootDir),
+  ]);
+  for (const editorPlan of editorPlans) {
+    conflicts.push(...editorPlan.conflicts);
+    files.push(...editorPlan.files);
+    notices.push(...editorPlan.notices);
   }
-
-  const extensionsPath = ".vscode/extensions.json";
-  const extensionsFile = await readOptionalFile(join(rootDir, extensionsPath), "{}\n");
-  collectJsoncPlan(
-    rootDir,
-    extensionsPath,
-    extensionsFile,
-    applyJsoncOperations(extensionsFile.content, extensionOperations),
-    files,
-    conflicts,
-    notices,
-  );
 
   return {
     choices,

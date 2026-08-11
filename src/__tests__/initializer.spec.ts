@@ -461,6 +461,13 @@ describe("defaultChoices", () => {
 describe("createInitializationPlan", () => {
   it("plans deterministic config, scripts, editor files, and ordered pnpm dependencies read-only", async () => {
     const rootDir = await createProject({
+      ".zed/settings.json": `{
+  // Keep project-specific Zed settings.
+  "languages": {
+    "TypeScript": { "tab_size": 4 }
+  }
+}
+`,
       ".vscode/extensions.json": json({ recommendations: ["existing.extension"] }),
       ".vscode/settings.json": json({
         "editor.codeActionsOnSave": { "source.fixAll.oxc": "always" },
@@ -538,6 +545,18 @@ export default amamo({
     expect(JSON.parse(plannedFile(plan, ".vscode/extensions.json").content)).toEqual({
       recommendations: ["existing.extension", "oxc.oxc-vscode"],
     });
+    const zedSettingsSource = plannedFile(plan, ".zed/settings.json").content;
+    const zedSettings = JSON.parse(zedSettingsSource.replace(/\s*\/\/.*$/gm, ""));
+    expect(zedSettingsSource).toContain("Keep project-specific Zed settings");
+    expect(zedSettings.auto_install_extensions.oxc).toBe(true);
+    expect(zedSettings.lsp.oxlint.initialization_options.settings.fixKind).toBe("safe_fix");
+    expect(zedSettings.languages.TypeScript).toMatchObject({
+      format_on_save: "on",
+      formatter: [{ language_server: { name: "oxfmt" } }, { code_action: "source.fixAll.oxc" }],
+      tab_size: 4,
+    });
+    expect(zedSettings.languages.JSON.formatter).toEqual([{ language_server: { name: "oxfmt" } }]);
+    expect(zedSettings.languages.Astro.formatter).toEqual([{ code_action: "source.fixAll.oxc" }]);
     expect(plan.install).toEqual({
       args: [
         "add",
@@ -655,6 +674,46 @@ export default amamo({
     );
     expect(plan.conflicts).toEqual([expect.stringContaining("source.format.oxc")]);
     expect(await readFile(join(rootDir, ".vscode/settings.json"), "utf8")).toBe(settingsSource);
+  });
+
+  it.each([
+    [
+      "unsafe fixes",
+      json({
+        lsp: {
+          oxlint: { initialization_options: { settings: { fixKind: "dangerous_fix" } } },
+        },
+      }),
+      "fixKind",
+    ],
+    [
+      "reverse formatter order",
+      json({
+        languages: {
+          TypeScript: {
+            formatter: [
+              { code_action: "source.fixAll.oxc" },
+              { language_server: { name: "oxfmt" } },
+            ],
+          },
+        },
+      }),
+      "Oxfmt",
+    ],
+  ])("preserves Zed settings with %s", async (_label, settingsSource, conflictText) => {
+    const rootDir = await createProject({
+      ".zed/settings.json": settingsSource,
+      "package.json": json({}),
+    });
+    const detection = await detectProject(rootDir);
+
+    const plan = await createInitializationPlan(detection, defaultChoices(detection));
+
+    expect(plan.files.some((file) => file.path === join(rootDir, ".zed/settings.json"))).toBe(
+      false,
+    );
+    expect(plan.conflicts).toEqual([expect.stringContaining(conflictText)]);
+    expect(await readFile(join(rootDir, ".zed/settings.json"), "utf8")).toBe(settingsSource);
   });
 
   it.each([
