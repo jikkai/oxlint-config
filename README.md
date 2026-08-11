@@ -37,13 +37,13 @@ can install both tools and prepare a project without replacing an existing lint 
 
 ## Requirements and Compatibility
 
-| Requirement          | Supported range | Notes                                                                   |
-| -------------------- | --------------- | ----------------------------------------------------------------------- |
-| Node.js              | `>=22.18`       | Enforced by this package's `engines` field.                             |
-| `oxlint`             | `^1.76.0`       | Required peer dependency and source of native plugins.                  |
-| `oxfmt`              | `^0.61.0`       | Required peer dependency used by the initializer's formatting workflow. |
-| `oxlint-tailwindcss` | `^1.6.0`        | Optional; required only when `tailwindcss` is configured.               |
-| `oxlint-tsgolint`    | `^7.0.2001`     | Optional; required only when `typeAware` is enabled.                    |
+| Requirement          | Supported range   | Notes                                                                   |
+| -------------------- | ----------------- | ----------------------------------------------------------------------- |
+| Node.js              | `>=22.18`         | Enforced by this package's `engines` field.                             |
+| `oxlint`             | `>=1.56.0 <2.0.0` | Required peer dependency and source of native plugins.                  |
+| `oxfmt`              | `>=0.1.0 <1.0.0`  | Required peer dependency used by the initializer's formatting workflow. |
+| `oxlint-tailwindcss` | `^1.7.1`          | Optional; required only when `tailwindcss` is configured.               |
+| `oxlint-tsgolint`    | `^7.0.2001`       | Optional; required only when `typeAware` is enabled.                    |
 
 The initializer supports pnpm, npm, Yarn, and Bun projects when it can identify one package
 manager safely. Repository development uses pnpm `11.18.0`.
