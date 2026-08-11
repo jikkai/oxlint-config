@@ -5,6 +5,10 @@
   "homepage": "https://jikkai.github.io/oxlint-config/",
   "license": "MIT",
   "author": "白熱 <sonne@asaki.me>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jikkai/oxlint-config.git"
+  },
   "bin": {
     "amamo-oxlint-config": "dist/cli.js"
   },
