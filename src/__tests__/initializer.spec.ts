@@ -16,9 +16,7 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, sep } from "node:path";
-
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import type {
   IFileChange,
   IInitializationChoices,

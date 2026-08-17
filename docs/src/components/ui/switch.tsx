@@ -1,7 +1,6 @@
 "use client";
 
 import { Switch as SwitchPrimitive } from "@base-ui/react/switch";
-
 import { cn } from "@/lib/utils";
 
 function Switch({
@@ -23,7 +22,7 @@ function Switch({
     >
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
-        className="pointer-events-none block rounded-full bg-background ring-0 transition-transform group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)] dark:data-checked:bg-primary-foreground group-data-[size=default]/switch:data-unchecked:translate-x-0 group-data-[size=sm]/switch:data-unchecked:translate-x-0 dark:data-unchecked:bg-foreground"
+        className="pointer-events-none block rounded-full bg-background ring-0 transition-transform group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 data-checked:group-data-[size=default]/switch:translate-x-[calc(100%-2px)] data-checked:group-data-[size=sm]/switch:translate-x-[calc(100%-2px)] dark:data-checked:bg-primary-foreground data-unchecked:group-data-[size=default]/switch:translate-x-0 data-unchecked:group-data-[size=sm]/switch:translate-x-0 dark:data-unchecked:bg-foreground"
       />
     </SwitchPrimitive.Root>
   );

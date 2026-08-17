@@ -17,7 +17,6 @@ import {
   unlink,
 } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
-
 import type { IAmamoOptions, IExperimentalOptions } from "./config.js";
 import type { IJsoncMergeResult, JsoncOperation } from "./jsonc.js";
 import { experimentalPackages } from "./experimental.js";

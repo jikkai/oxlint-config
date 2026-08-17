@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-
 import { applyJsoncOperations } from "../jsonc.js";
 
 describe("applyJsoncOperations", () => {

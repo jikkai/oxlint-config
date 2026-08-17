@@ -1,6 +1,5 @@
 import type { OxlintConfig } from "oxlint";
 import { defineConfig } from "oxlint";
-
 import type { IExperimentalOptions } from "./config.js";
 import { scriptFiles, testFiles } from "./presets.js";
 

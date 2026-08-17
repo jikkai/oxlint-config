@@ -1,6 +1,5 @@
 import type { Locale } from "@/lib/i18n";
 import type { IRuleRow } from "@/lib/rules";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,26 +55,28 @@ export function RuleTable({ locale, onSelect, rows, selectedRule }: IRuleTablePr
 
   if (isMobile) {
     return (
-      <ul aria-label={translate(locale, "tabRules")} className="rule-mobile-list">
+      <ul aria-label={translate(locale, "tabRules")} className="m-0 flex list-none flex-col p-0">
         {rows.map((row) => {
           const id = ruleRowId(row);
           const badge = severityBadge(row);
           return (
-            <li className="rule-render-item" key={id}>
+            <li className="[contain-intrinsic-size:0_56px] [content-visibility:auto]" key={id}>
               <Button
                 aria-label={inspectLabel(row)}
                 aria-pressed={selectedRule === id}
-                className="rule-mobile-button"
+                className="min-h-14 w-full justify-between rounded-none border-b border-border/70 px-4 py-2.5 aria-pressed:bg-accent/70 aria-pressed:[box-shadow:inset_3px_0_0_var(--primary)]"
                 onClick={() => onSelect(row)}
                 variant="ghost"
               >
                 <span className="min-w-0 flex-1 text-left">
-                  <span className="block truncate font-mono text-sm">{row.rule}</span>
-                  <span className="block truncate text-xs text-muted-foreground">
+                  <span className="block truncate font-mono text-[13px] font-medium">
+                    {row.rule}
+                  </span>
+                  <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
                     {row.plugin} · {row.preset ?? "—"}
                   </span>
                 </span>
-                <Badge className={badge.className} variant="outline">
+                <Badge className={`${badge.className} font-mono text-[10px]`} variant="outline">
                   {badge.label}
                 </Badge>
               </Button>
@@ -87,13 +88,21 @@ export function RuleTable({ locale, onSelect, rows, selectedRule }: IRuleTablePr
   }
 
   return (
-    <Table>
-      <TableHeader>
+    <Table className="min-w-[42rem] table-fixed">
+      <TableHeader className="sticky top-0 z-10 bg-muted/90 backdrop-blur-md">
         <TableRow>
-          <TableHead>{translate(locale, "ruleTableRule")}</TableHead>
-          <TableHead>{translate(locale, "detailPlugin")}</TableHead>
-          <TableHead>{translate(locale, "detailPreset")}</TableHead>
-          <TableHead>{translate(locale, "detailSeverity")}</TableHead>
+          <TableHead className="w-[48%] px-4 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+            {translate(locale, "ruleTableRule")}
+          </TableHead>
+          <TableHead className="w-[19%] px-3 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+            {translate(locale, "detailPlugin")}
+          </TableHead>
+          <TableHead className="w-[19%] px-3 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+            {translate(locale, "detailPreset")}
+          </TableHead>
+          <TableHead className="w-[14%] px-3 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+            {translate(locale, "detailSeverity")}
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -104,7 +113,7 @@ export function RuleTable({ locale, onSelect, rows, selectedRule }: IRuleTablePr
             <TableRow
               aria-label={inspectLabel(row)}
               aria-selected={selectedRule === id}
-              className="rule-render-item cursor-pointer focus-visible:bg-muted focus-visible:outline-2 focus-visible:outline-ring"
+              className="cursor-pointer border-border/70 [contain-intrinsic-size:0_41px] [content-visibility:auto] hover:bg-accent/40 focus-visible:bg-muted focus-visible:outline-2 focus-visible:outline-ring data-[state=selected]:bg-accent/70 data-[state=selected]:[box-shadow:inset_3px_0_0_var(--primary)]"
               data-state={selectedRule === id ? "selected" : undefined}
               key={id}
               onClick={() => onSelect(row)}
@@ -115,13 +124,17 @@ export function RuleTable({ locale, onSelect, rows, selectedRule }: IRuleTablePr
               }}
               tabIndex={0}
             >
-              <TableCell>
-                <span className="block max-w-full truncate font-mono">{row.rule}</span>
+              <TableCell className="px-4 py-2.5 text-[13px]">
+                <span className="block max-w-full truncate font-mono font-medium">{row.rule}</span>
               </TableCell>
-              <TableCell className="font-mono text-xs">{row.plugin}</TableCell>
-              <TableCell className="font-mono text-xs">{row.preset ?? "—"}</TableCell>
-              <TableCell>
-                <Badge className={badge.className} variant="outline">
+              <TableCell className="px-3 py-2.5 font-mono text-xs text-muted-foreground">
+                {row.plugin}
+              </TableCell>
+              <TableCell className="px-3 py-2.5 font-mono text-xs text-muted-foreground">
+                {row.preset ?? "—"}
+              </TableCell>
+              <TableCell className="px-3 py-2.5">
+                <Badge className={`${badge.className} font-mono text-[10px]`} variant="outline">
                   {badge.label}
                 </Badge>
               </TableCell>

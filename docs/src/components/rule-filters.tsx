@@ -1,8 +1,6 @@
 import { SearchIcon } from "lucide-react";
-
 import type { Locale } from "@/lib/i18n";
 import type { IRuleFilters, IRuleRow, IScopeSummary, RuleView } from "@/lib/rules";
-
 import { Button } from "@/components/ui/button";
 import {
   Combobox,
@@ -62,13 +60,13 @@ export function RuleFilters({
   ];
 
   return (
-    <FieldGroup className="rule-filters gap-3">
-      <div className="filter-primary">
+    <FieldGroup className="gap-4">
+      <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(12rem,1fr)_auto] lg:items-end">
         <Field>
           <FieldLabel className="sr-only" htmlFor="rule-search">
             {translate(locale, "filterSearch")}
           </FieldLabel>
-          <InputGroup>
+          <InputGroup className="h-9 bg-background shadow-xs">
             <InputGroupAddon>
               <SearchIcon />
             </InputGroupAddon>
@@ -85,8 +83,10 @@ export function RuleFilters({
           </InputGroup>
         </Field>
 
-        <Field orientation="horizontal">
-          <FieldLabel id="rule-view-label">{translate(locale, "detailState")}</FieldLabel>
+        <Field className="lg:w-fit" orientation="horizontal">
+          <FieldLabel className="text-xs text-muted-foreground" id="rule-view-label">
+            {translate(locale, "detailState")}
+          </FieldLabel>
           <ToggleGroup
             aria-labelledby="rule-view-label"
             onValueChange={(values) => {
@@ -103,7 +103,7 @@ export function RuleFilters({
         </Field>
       </div>
 
-      <div className="filter-grid">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-end">
         {(
           [
             ["plugin", "filterPlugin", plugins],
@@ -116,8 +116,12 @@ export function RuleFilters({
           const label = translate(locale, labelKey);
           const controlId = `${key}-filter`;
           return (
-            <Field key={key}>
-              <FieldLabel htmlFor={controlId} id={`${key}-filter-label`}>
+            <Field className="lg:min-w-30 lg:flex-1" key={key}>
+              <FieldLabel
+                className="text-xs text-muted-foreground"
+                htmlFor={controlId}
+                id={`${key}-filter-label`}
+              >
                 {label}
               </FieldLabel>
               <Select
@@ -161,8 +165,12 @@ export function RuleFilters({
           );
         })}
 
-        <Field>
-          <FieldLabel htmlFor="scope-filter" id="scope-filter-label">
+        <Field className="lg:min-w-30 lg:flex-1">
+          <FieldLabel
+            className="text-xs text-muted-foreground"
+            htmlFor="scope-filter"
+            id="scope-filter-label"
+          >
             {translate(locale, "filterScope")}
           </FieldLabel>
           <Combobox
@@ -197,7 +205,7 @@ export function RuleFilters({
           </Combobox>
         </Field>
 
-        <Button className="filter-reset" onClick={onReset} size="sm" variant="ghost">
+        <Button className="w-fit lg:shrink-0" onClick={onReset} size="sm" variant="ghost">
           {translate(locale, "resetFilters")}
         </Button>
       </div>

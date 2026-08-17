@@ -1,6 +1,5 @@
 import type { ParseError } from "jsonc-parser";
 import { parse } from "jsonc-parser";
-
 import type { JsoncOperation } from "../jsonc.js";
 import type { IEditorInitializationPlan } from "./editor.js";
 import { createEditorInitializationPlan } from "./editor.js";

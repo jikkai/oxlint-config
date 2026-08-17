@@ -1,6 +1,5 @@
 import type { OxlintConfig } from "oxlint";
 import { defineConfig } from "oxlint";
-
 import type { ITailwindcssOptions } from "./presets.js";
 import { selectExperimental } from "./experimental.js";
 import {

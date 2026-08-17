@@ -1,0 +1,15 @@
+{
+  "sortImports": {
+    "groups": [
+      ["type-builtin", "type-external"],
+      ["value-builtin", "value-external"],
+      ["type-internal", "type-subpath"],
+      ["value-internal", "value-subpath"],
+      ["type-parent", "type-sibling", "type-index"],
+      ["value-parent", "value-sibling", "value-index"],
+      ["side_effect_style", "style", "side_effect"],
+      "unknown"
+    ],
+    "newlinesBetween": false
+  }
+}

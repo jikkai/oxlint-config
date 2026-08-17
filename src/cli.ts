@@ -8,7 +8,6 @@ import { join, relative } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-
 import type {
   IInitializationChoices,
   IExecutionResult,

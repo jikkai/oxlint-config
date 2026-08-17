@@ -1,9 +1,7 @@
 /// <reference types="node" />
 
 import { spawnSync } from "node:child_process";
-
 import { describe, expect, it } from "vitest";
-
 import {
   base,
   imports,

@@ -12,9 +12,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { PassThrough, Readable } from "node:stream";
 import { pathToFileURL } from "node:url";
-
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import type { RunCommand } from "../initializer.js";
 import { isDirectExecution, parseCliArgs, runCli } from "../cli.js";
 

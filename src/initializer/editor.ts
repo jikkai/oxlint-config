@@ -3,7 +3,6 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-
 import type { JsoncOperation } from "../jsonc.js";
 import { applyJsoncOperations } from "../jsonc.js";
 

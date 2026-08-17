@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-
 import amamo from "../config.js";
 import { jest, jsxA11y, nextjs, react, vitest } from "../presets.js";
 

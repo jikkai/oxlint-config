@@ -1,9 +1,8 @@
 /// <reference types="node" />
 
-import { isDeepStrictEqual } from "node:util";
-
 import type { FormattingOptions, Node, ParseError } from "jsonc-parser";
 import { applyEdits, findNodeAtLocation, getNodeValue, modify, parseTree } from "jsonc-parser";
+import { isDeepStrictEqual } from "node:util";
 
 export type JsoncOperation =
   | { kind: "appendUnique"; path: readonly string[]; value: unknown }

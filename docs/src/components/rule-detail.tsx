@@ -1,8 +1,6 @@
-import { ExternalLinkIcon } from "lucide-react";
-
+import { ExternalLinkIcon, PanelRightIcon } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import type { IRuleRow } from "@/lib/rules";
-
 import { JsonCode } from "@/components/json-code";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -18,8 +16,18 @@ interface IRuleDetailProps {
 export function RuleDetail({ locale, row, schemaDefinitions }: IRuleDetailProps) {
   if (!row) {
     return (
-      <aside aria-label={translate(locale, "ruleDetailsTitle")} className="rule-detail-panel">
-        <p className="text-sm text-muted-foreground">{translate(locale, "selectRule")}</p>
+      <aside
+        aria-label={translate(locale, "ruleDetailsTitle")}
+        className="flex h-full min-w-0 flex-col gap-5"
+      >
+        <div className="grid min-h-40 place-items-center p-6 text-center">
+          <div className="flex max-w-48 flex-col items-center gap-3 text-muted-foreground">
+            <span className="grid size-9 place-items-center rounded-lg border bg-background">
+              <PanelRightIcon className="size-4" />
+            </span>
+            <p className="text-sm leading-5">{translate(locale, "selectRule")}</p>
+          </div>
+        </div>
       </aside>
     );
   }
@@ -76,20 +84,25 @@ export function RuleDetail({ locale, row, schemaDefinitions }: IRuleDetailProps)
     : undefined;
 
   return (
-    <aside aria-label={translate(locale, "ruleDetailsTitle")} className="rule-detail-panel">
+    <aside
+      aria-label={translate(locale, "ruleDetailsTitle")}
+      className="flex h-full min-w-0 flex-col gap-5"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs text-muted-foreground">{translate(locale, "ruleDetailsTitle")}</p>
-          <h2 className="font-mono text-base font-semibold wrap-break-word">{row.rule}</h2>
+          <p className="text-[10px] font-semibold tracking-[0.12em] text-primary uppercase">
+            {translate(locale, "ruleDetailsTitle")}
+          </p>
+          <h2 className="mt-1 font-mono text-base font-semibold wrap-break-word">{row.rule}</h2>
         </div>
         {row.external ? <Badge variant="outline">{translate(locale, "alpha")}</Badge> : null}
       </div>
 
-      <dl className="detail-grid">
+      <dl className="grid min-w-0 grid-cols-[6rem_minmax(0,1fr)] gap-x-3 gap-y-3 text-[13px] [&_dd]:m-0 [&_dd]:min-w-0 [&_dd]:wrap-anywhere [&_dt]:text-[11px] [&_dt]:font-medium [&_dt]:text-muted-foreground">
         <dt>{translate(locale, "detailState")}</dt>
         <dd>
           <Badge
-            className={row.enabled ? enabledBadgeClassName : disabledBadgeClassName}
+            className={`${row.enabled ? enabledBadgeClassName : disabledBadgeClassName} font-mono text-[10px]`}
             variant="outline"
           >
             {row.enabled ? translate(locale, "stateEnabled") : translate(locale, "stateDisabled")}
@@ -97,7 +110,7 @@ export function RuleDetail({ locale, row, schemaDefinitions }: IRuleDetailProps)
         </dd>
         <dt>{translate(locale, "detailSeverity")}</dt>
         <dd>
-          <Badge className={severityBadge.className} variant="outline">
+          <Badge className={`${severityBadge.className} font-mono text-[10px]`} variant="outline">
             {severityBadge.label}
           </Badge>
         </dd>
@@ -108,38 +121,55 @@ export function RuleDetail({ locale, row, schemaDefinitions }: IRuleDetailProps)
       </dl>
 
       <Separator />
-      <section className="detail-section">
-        <h3>{translate(locale, "detailScopes")}</h3>
+      <section className="flex min-w-0 flex-col gap-2">
+        <h3 className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+          {translate(locale, "detailScopes")}
+        </h3>
         <div className="flex flex-wrap gap-1.5">
           {scopes.map((scope) => (
-            <Badge className="font-mono" key={scope} variant="outline">
+            <Badge
+              className="max-w-full font-mono wrap-anywhere whitespace-normal"
+              key={scope}
+              variant="outline"
+            >
               {scope}
             </Badge>
           ))}
         </div>
       </section>
 
-      <section className="detail-section">
-        <h3>{translate(locale, "detailOptions")}</h3>
-        <pre>{JSON.stringify(row.options, null, 2)}</pre>
+      <section className="flex min-w-0 flex-col gap-2">
+        <h3 className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+          {translate(locale, "detailOptions")}
+        </h3>
+        <pre className="w-full min-w-0 overflow-hidden rounded-lg border bg-muted/60 p-3 font-mono text-xs leading-5 wrap-anywhere whitespace-pre-wrap">
+          {JSON.stringify(row.options, null, 2)}
+        </pre>
       </section>
 
       {schema ? (
-        <section className="detail-section">
-          <h3>{translate(locale, "detailSchema")}</h3>
+        <section className="flex min-w-0 flex-col gap-2">
+          <h3 className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+            {translate(locale, "detailSchema")}
+          </h3>
           <JsonCode code={JSON.stringify(schema, null, 2)} />
         </section>
       ) : null}
 
       {row.description ? (
-        <section className="detail-section">
-          <h3>{translate(locale, "detailDescription")}</h3>
-          <p className="text-sm text-muted-foreground">{row.description}</p>
+        <section className="flex min-w-0 flex-col gap-2">
+          <h3 className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+            {translate(locale, "detailDescription")}
+          </h3>
+          <p className="text-sm leading-6 text-muted-foreground">{row.description}</p>
         </section>
       ) : null}
 
       <a
-        className={buttonVariants({ variant: "outline" })}
+        className={buttonVariants({
+          className: "mt-auto w-full justify-between",
+          variant: "outline",
+        })}
         href={row.docsUrl}
         rel="noreferrer"
         target="_blank"

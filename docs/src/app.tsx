@@ -1,11 +1,9 @@
 import type { CSSProperties } from "react";
+import { BracesIcon, ClipboardIcon, FilterIcon, PanelRightIcon, RotateCcwIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { ClipboardIcon, FilterIcon, PanelRightIcon, RotateCcwIcon } from "lucide-react";
-
 import type { PresetKey } from "@/lib/config-state";
 import type { IRuleFilters, IRuleRow } from "@/lib/rules";
 import type { IExplorerState } from "@/lib/url-state";
-
 import { ConfigurationSidebar } from "@/components/configuration-sidebar";
 import { RuleDetail } from "@/components/rule-detail";
 import { RuleFilters } from "@/components/rule-filters";
@@ -30,6 +28,7 @@ import {
 } from "@/components/ui/sheet";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -99,6 +98,7 @@ export function App() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [copyStatus, setCopyStatus] = useState<"copied" | "failed">();
+  const detailSheetRef = useRef<HTMLDivElement>(null);
   const explorerRef = useRef(explorer);
   explorerRef.current = explorer;
   const isMobile = useIsMobile();
@@ -188,7 +188,10 @@ export function App() {
 
   if (!snapshot) {
     return (
-      <main aria-label={translate(explorer.lang, "appName")} className="loading-shell">
+      <main
+        aria-label={translate(explorer.lang, "appName")}
+        className="mx-auto flex min-h-svh w-full max-w-5xl flex-col justify-center gap-6 p-6"
+      >
         <Skeleton className="h-10 w-56" />
         <Skeleton className="h-72 w-full" />
       </main>
@@ -312,7 +315,7 @@ export function App() {
 
   return (
     <SidebarProvider
-      className="app-shell"
+      className="h-svh min-h-0 overflow-hidden"
       style={
         {
           "--sidebar-width": "18rem",
@@ -326,23 +329,36 @@ export function App() {
           updateExplorer((current) => ({ ...current, config: allStableConfigState() }), "replace")
         }
         onPresetChange={handlePresetChange}
+        oxlintVersion={snapshot.oxlintVersion}
+        packageVersion={snapshot.packageVersion}
       />
-      <SidebarInset className="app-inset">
-        <header className="app-header">
+      <SidebarInset className="h-svh min-h-0 overflow-hidden">
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-3 border-b bg-background/90 px-3 backdrop-blur-xl lg:px-5">
           <div className="flex min-w-0 items-center gap-2">
-            <SidebarTrigger className="touch-target" />
-            <div className="min-w-0">
-              <h1 className="truncate font-heading text-base font-semibold">
+            <SidebarTrigger className="min-h-11 min-w-11 lg:min-h-0 lg:min-w-0" />
+            <div className="hidden size-8 shrink-0 place-items-center rounded-lg bg-foreground text-background shadow-sm sm:grid lg:hidden">
+              <BracesIcon className="size-4" />
+            </div>
+            <div className="min-w-0 lg:hidden">
+              <h1 className="truncate font-heading text-sm font-semibold tracking-tight sm:text-base">
                 {translate(explorer.lang, "appName")}
               </h1>
-              <p className="truncate text-xs text-muted-foreground">
-                @amamo/oxlint-config {snapshot.packageVersion} · Oxlint {snapshot.oxlintVersion}
+              <p className="flex items-center gap-1.5 truncate text-[11px] text-muted-foreground">
+                <span className="hidden sm:inline">@amamo/oxlint-config</span>
+                <span className="rounded border bg-muted px-1 font-mono text-[10px] leading-4">
+                  v{snapshot.packageVersion}
+                </span>
+                <span className="truncate">Oxlint {snapshot.oxlintVersion}</span>
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <p aria-live="polite" className="result-status" role="status">
+            <p
+              aria-live="polite"
+              className="hidden rounded-full border bg-muted/70 px-2.5 py-1 text-xs text-muted-foreground tabular-nums sm:block"
+              role="status"
+            >
               {resultText}
             </p>
             <ToggleGroup
@@ -352,19 +368,23 @@ export function App() {
               value={[explorer.lang]}
               variant="outline"
             >
-              <ToggleGroupItem className="touch-target" value="en">
+              <ToggleGroupItem className="min-h-11 min-w-11 lg:min-h-0 lg:min-w-0" value="en">
                 EN
               </ToggleGroupItem>
-              <ToggleGroupItem className="touch-target" value="zh">
+              <ToggleGroupItem className="min-h-11 min-w-11 lg:min-h-0 lg:min-w-0" value="zh">
                 中文
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
         </header>
 
-        <Tabs className="app-tabs" onValueChange={handleTabChange} value={explorer.tab}>
-          <div className="tab-toolbar">
-            <TabsList variant="line">
+        <Tabs
+          className="min-h-0 flex-1 gap-0 overflow-hidden"
+          onValueChange={handleTabChange}
+          value={explorer.tab}
+        >
+          <div className="flex h-12 shrink-0 items-center justify-between gap-3 border-b bg-background px-3 lg:px-5">
+            <TabsList className="h-full gap-0 p-0" variant="line">
               {(
                 [
                   ["rules", "tabRules"],
@@ -373,7 +393,11 @@ export function App() {
                   ["config", "tabConfig"],
                 ] as const
               ).map(([value, key]) => (
-                <TabsTrigger className="touch-target" key={value} value={value}>
+                <TabsTrigger
+                  className="h-full min-h-11 rounded-none px-2 text-[13px] after:-bottom-px after:bg-primary sm:px-3 lg:min-h-0"
+                  key={value}
+                  value={value}
+                >
                   {translate(explorer.lang, key)}
                 </TabsTrigger>
               ))}
@@ -381,35 +405,50 @@ export function App() {
 
             <Sheet onOpenChange={setFiltersOpen} open={filtersOpen}>
               <SheetTrigger
-                render={<Button className="mobile-only touch-target" size="sm" variant="outline" />}
+                render={
+                  <Button
+                    className={
+                      explorer.tab === "rules"
+                        ? "inline-flex min-h-11 min-w-11 lg:hidden"
+                        : "hidden"
+                    }
+                    size="sm"
+                    variant="outline"
+                  />
+                }
               >
                 <FilterIcon data-icon="inline-start" />
-                {translate(explorer.lang, "filtersTitle")}
+                <span className="sr-only sm:not-sr-only">
+                  {translate(explorer.lang, "filtersTitle")}
+                </span>
               </SheetTrigger>
-              <SheetContent className="mobile-touch-surface" side="left">
+              <SheetContent
+                className="[&_[role=combobox]]:min-h-11 [&_[role=combobox]]:min-w-11 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11"
+                side="left"
+              >
                 <SheetHeader>
                   <SheetTitle>{translate(explorer.lang, "filtersTitle")}</SheetTitle>
                   <SheetDescription>{resultText}</SheetDescription>
                 </SheetHeader>
-                <div className="app-scroll-region flex-1 px-4 pb-4">
+                <div className="min-h-0 flex-1 overflow-auto overscroll-contain px-4 pb-4">
                   {isMobile ? filterPanel : null}
                 </div>
               </SheetContent>
             </Sheet>
           </div>
 
-          <TabsContent className="view-content rules-view" value="rules">
-            <div className="rules-layout">
-              <div className="rules-primary">
+          <TabsContent className="min-h-0 overflow-hidden" value="rules">
+            <div className="grid h-full min-h-0 grid-cols-1 overflow-hidden lg:grid-cols-[minmax(0,1fr)_minmax(19rem,22rem)]">
+              <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
                 <aside
                   aria-label={translate(explorer.lang, "filtersTitle")}
-                  className="desktop-filters"
+                  className="hidden max-h-1/2 shrink-0 overflow-y-auto overscroll-contain border-b bg-card/70 p-4 lg:block"
                 >
                   {isMobile ? null : filterPanel}
                 </aside>
                 <section
                   aria-label={translate(explorer.lang, "tabRules")}
-                  className="rule-results app-scroll-region"
+                  className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain [&_[data-slot=table-container]]:overflow-clip"
                 >
                   {filteredRows.length === 0 ? (
                     <Empty>
@@ -435,7 +474,7 @@ export function App() {
                   )}
                 </section>
               </div>
-              <div className="desktop-detail app-scroll-region">
+              <div className="hidden h-full min-h-0 min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain border-l bg-background p-5 lg:block">
                 {isMobile ? null : (
                   <RuleDetail
                     locale={explorer.lang}
@@ -447,27 +486,36 @@ export function App() {
             </div>
           </TabsContent>
 
-          <TabsContent className="view-content tab-scroll-region" value="presets">
-            <section className="summary-view">
+          <TabsContent className="min-h-0 overflow-y-auto overscroll-contain" value="presets">
+            <section className="mx-auto flex min-h-full w-full max-w-4xl flex-col gap-6 p-4 sm:p-8 lg:p-10">
               <div>
-                <p className="eyebrow">{translate(explorer.lang, "tabPresets")}</p>
-                <h2>{translate(explorer.lang, "configurationTitle")}</h2>
+                <p className="text-[11px] font-semibold tracking-[0.12em] text-primary uppercase">
+                  {translate(explorer.lang, "tabPresets")}
+                </p>
+                <h2 className="font-heading text-2xl font-semibold tracking-tight">
+                  {translate(explorer.lang, "configurationTitle")}
+                </h2>
               </div>
-              <div className="summary-list">
+              <div className="flex flex-col divide-y overflow-hidden rounded-xl border bg-card shadow-sm shadow-foreground/5">
                 {presetKeys.map((preset) => {
                   const count = presetCounts.get(preset) ?? 0;
                   const active = isPresetEnabled(explorer.config, preset);
                   const countText = formatCount(count);
                   return (
-                    <article className="summary-row" key={preset}>
+                    <article
+                      className="flex min-h-17 items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-muted/60"
+                      key={preset}
+                    >
                       <div className="min-w-0">
-                        <h3>{translate(explorer.lang, presetNames[preset])}</h3>
+                        <h3 className="truncate text-sm font-medium">
+                          {translate(explorer.lang, presetNames[preset])}
+                        </h3>
                         <div className="flex flex-wrap gap-1.5">
-                          <Badge variant={active ? "secondary" : "outline"}>
-                            {active
-                              ? translate(explorer.lang, "stateEnabled")
-                              : translate(explorer.lang, "stateDisabled")}
-                          </Badge>
+                          {preset === "base" ? (
+                            <Badge variant="secondary">
+                              {translate(explorer.lang, "stateEnabled")}
+                            </Badge>
+                          ) : null}
                           {preset === "typeAware" ? (
                             <Badge variant="outline">
                               {translate(explorer.lang, "typeAwarePackage")}
@@ -499,16 +547,13 @@ export function App() {
                       </div>
                       <div className="flex items-center gap-2">
                         {preset !== "base" ? (
-                          <Button
-                            aria-label={`${active ? translate(explorer.lang, "stateDisabled") : translate(explorer.lang, "stateEnabled")} ${translate(explorer.lang, presetNames[preset])}`}
-                            onClick={() => handlePresetChange(preset, !active)}
+                          <Switch
+                            aria-label={translate(explorer.lang, presetNames[preset])}
+                            checked={active}
+                            disabled={preset === "react" && explorer.config.nextjs}
+                            onCheckedChange={(enabled) => handlePresetChange(preset, enabled)}
                             size="sm"
-                            variant="ghost"
-                          >
-                            {active
-                              ? translate(explorer.lang, "stateEnabled")
-                              : translate(explorer.lang, "stateDisabled")}
-                          </Button>
+                          />
                         ) : null}
                         <Button
                           aria-label={`${preset} — ${countText}`}
@@ -527,13 +572,17 @@ export function App() {
             </section>
           </TabsContent>
 
-          <TabsContent className="view-content tab-scroll-region" value="scopes">
-            <section className="summary-view">
+          <TabsContent className="min-h-0 overflow-y-auto overscroll-contain" value="scopes">
+            <section className="mx-auto flex min-h-full w-full max-w-4xl flex-col gap-6 p-4 sm:p-8 lg:p-10">
               <div>
-                <p className="eyebrow">{translate(explorer.lang, "tabScopes")}</p>
-                <h2>{translate(explorer.lang, "detailScopes")}</h2>
+                <p className="text-[11px] font-semibold tracking-[0.12em] text-primary uppercase">
+                  {translate(explorer.lang, "tabScopes")}
+                </p>
+                <h2 className="font-heading text-2xl font-semibold tracking-tight">
+                  {translate(explorer.lang, "detailScopes")}
+                </h2>
               </div>
-              <div className="summary-list">
+              <div className="flex flex-col divide-y overflow-hidden rounded-xl border bg-card shadow-sm shadow-foreground/5">
                 {scopes.map((scope) => {
                   const typeScript = scope.scopes.some((item) => item.includes(".ts"));
                   const name =
@@ -544,9 +593,12 @@ export function App() {
                         : scope.scopes.join(", ");
                   const countText = formatCount(scope.count);
                   return (
-                    <article className="summary-row" key={scope.id}>
+                    <article
+                      className="flex min-h-17 items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-muted/60"
+                      key={scope.id}
+                    >
                       <div className="min-w-0">
-                        <h3>{name}</h3>
+                        <h3 className="truncate text-sm font-medium">{name}</h3>
                         <p className="font-mono text-xs wrap-break-word text-muted-foreground">
                           {scope.scopes.length === 0 ? "./" : scope.scopes.join(", ")}
                         </p>
@@ -566,35 +618,55 @@ export function App() {
             </section>
           </TabsContent>
 
-          <TabsContent className="view-content tab-scroll-region" value="config">
-            <section className="config-view">
+          <TabsContent className="min-h-0 overflow-y-auto overscroll-contain" value="config">
+            <section className="mx-auto flex min-h-full w-full max-w-4xl flex-col gap-6 p-4 sm:p-8 lg:p-10">
               <div>
-                <p className="eyebrow">{translate(explorer.lang, "tabConfig")}</p>
-                <h2>{translate(explorer.lang, "configTitle")}</h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-[11px] font-semibold tracking-[0.12em] text-primary uppercase">
+                  {translate(explorer.lang, "tabConfig")}
+                </p>
+                <h2 className="font-heading text-2xl font-semibold tracking-tight">
+                  {translate(explorer.lang, "configTitle")}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
                   {translate(explorer.lang, "configInstruction")}
                 </p>
               </div>
-              <pre className="config-code">{configSnippet}</pre>
+              <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 shadow-xl shadow-foreground/10">
+                <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-neutral-900 px-4 py-2.5 text-neutral-400">
+                  <div className="flex items-center gap-2.5">
+                    <span className="size-2.5 rounded-full bg-primary" />
+                    <span className="font-mono text-[11px]">oxlint.config.ts</span>
+                  </div>
+                  <Button
+                    className="border-white/10 bg-white/5 text-neutral-200 hover:bg-white/10 hover:text-white"
+                    onClick={handleCopy}
+                    size="sm"
+                    variant="outline"
+                  >
+                    <ClipboardIcon data-icon="inline-start" />
+                    {translate(explorer.lang, "copyConfig")}
+                  </Button>
+                </div>
+                <pre className="min-h-40 overflow-x-auto p-5 font-mono text-[13px] leading-6 text-neutral-100">
+                  {configSnippet}
+                </pre>
+              </div>
+              {copyStatus ? (
+                <p aria-live="polite" className="text-sm text-muted-foreground" role="status">
+                  {translate(explorer.lang, copyStatus === "copied" ? "copied" : "copyFailed")}
+                </p>
+              ) : null}
               {packages.length > 0 ? (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm shadow-foreground/5">
                   <h3 className="text-sm font-medium">
                     {translate(explorer.lang, "installInstruction")}
                   </h3>
-                  <code className="install-command">pnpm add -D {packages.join(" ")}</code>
+                  <code className="block w-fit max-w-full overflow-x-auto rounded-lg bg-foreground px-3 py-2.5 font-mono text-xs text-background">
+                    <span className="text-background/45 select-none">$ </span>
+                    pnpm add -D {packages.join(" ")}
+                  </code>
                 </div>
               ) : null}
-              <div className="flex items-center gap-3">
-                <Button onClick={handleCopy}>
-                  <ClipboardIcon data-icon="inline-start" />
-                  {translate(explorer.lang, "copyConfig")}
-                </Button>
-                {copyStatus ? (
-                  <p aria-live="polite" className="text-sm text-muted-foreground" role="status">
-                    {translate(explorer.lang, copyStatus === "copied" ? "copied" : "copyFailed")}
-                  </p>
-                ) : null}
-              </div>
             </section>
           </TabsContent>
         </Tabs>
@@ -604,7 +676,7 @@ export function App() {
             disabled={!selectedRow}
             render={
               <Button
-                className="detail-fab mobile-only touch-target"
+                className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] inline-flex min-h-11 min-w-11 shadow-lg disabled:hidden lg:hidden"
                 size="sm"
                 variant="secondary"
               />
@@ -613,12 +685,17 @@ export function App() {
             <PanelRightIcon data-icon="inline-start" />
             {translate(explorer.lang, "ruleDetailsTitle")}
           </SheetTrigger>
-          <SheetContent className="mobile-touch-surface" side="right">
+          <SheetContent
+            className="[&_[role=combobox]]:min-h-11 [&_[role=combobox]]:min-w-11 [&_button]:min-h-11 [&_button]:min-w-11 [&_input]:min-h-11"
+            initialFocus={detailSheetRef}
+            ref={detailSheetRef}
+            side="right"
+          >
             <SheetHeader>
               <SheetTitle>{translate(explorer.lang, "ruleDetailsTitle")}</SheetTitle>
               <SheetDescription>{selectedRow?.rule ?? ""}</SheetDescription>
             </SheetHeader>
-            <div className="app-scroll-region flex-1 px-4 pb-4">
+            <div className="min-h-0 flex-1 overflow-auto overscroll-contain px-4 pb-4">
               {isMobile ? (
                 <RuleDetail
                   locale={explorer.lang}

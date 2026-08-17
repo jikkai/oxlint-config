@@ -4,9 +4,7 @@ import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-
 import tailwindcssPlugin from "oxlint-tailwindcss";
-
 import type {
   IRuleApplication,
   IRuleInventoryItem,
