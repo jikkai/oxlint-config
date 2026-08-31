@@ -3,6 +3,6 @@ function useValue() {
 }
 
 export function Fixture() {
-  useValue();
-  return null;
+  const value = useValue();
+  return <span>{value}</span>;
 }

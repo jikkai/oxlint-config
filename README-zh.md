@@ -38,7 +38,7 @@ export default amamo();
 | 要求                 | 支持范围          | 说明                                                   |
 | -------------------- | ----------------- | ------------------------------------------------------ |
 | Node.js              | `>=22.18`         | 由本包的 `engines` 字段约束。                          |
-| `oxlint`             | `>=1.56.0 <2.0.0` | 必需 peer dependency，也是原生插件的来源。             |
+| `oxlint`             | `>=1.80.0 <2.0.0` | 必需 peer dependency，也是原生插件的来源。             |
 | `oxfmt`              | `>=0.1.0 <1.0.0`  | 必需 peer dependency，供初始化器生成的格式化流程使用。 |
 | `oxlint-tailwindcss` | `^1.7.1`          | 可选；仅在配置 `tailwindcss` 时需要。                  |
 | `oxlint-tsgolint`    | `^7.0.2001`       | 可选；只在启用 `typeAware` 时需要。                    |
@@ -246,7 +246,7 @@ export default amamo({ ignores: ["dist/**", "coverage/**", "generated/**"] });
 | `typescript` | TypeScript 文件；要求单独声明 type-only import，并拒绝重复 import，但允许从同一模块另写一条 type-only import。 |
 | `imports`    | 启用原生 `import` 插件。                                                                                       |
 | `promise`    | 脚本文件；`catch-or-return` 和 `no-return-wrap` 为 error。                                                     |
-| `react`      | JSX/TSX；Hooks 规则，其中依赖完整性为 warning。                                                                |
+| `react`      | 脚本文件；Hooks 规则，其中依赖完整性为 warning；支持自动 JSX runtime。                                         |
 | `reactPerf`  | JSX/TSX；对作为 prop 传入的新 JSX、array、function 和 object 发出 warning。                                    |
 | `nextjs`     | JSX/TSX；async client component 与 duplicate head 为 error，HTML link 为 warning。                             |
 | `jsxA11y`    | JSX/TSX；检查 alt text、ARIA props/roles 与 anchor 有效性。                                                    |
@@ -267,8 +267,8 @@ export default defineConfig({ extends: [base, typescript, node] });
 
 ### React
 
-`react: true` 会对 `**/*.{jsx,tsx}` 应用 Hooks 规则，并在没有显式设置 `jsxA11y: false` 时
-启用 JSX A11y。
+`react: true` 会对脚本文件应用 Hooks 规则、支持自动 JSX runtime，并在没有显式设置
+`jsxA11y: false` 时启用 JSX A11y。
 
 ### Next.js
 

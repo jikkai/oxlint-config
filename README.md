@@ -40,7 +40,7 @@ can install both tools and prepare a project without replacing an existing lint 
 | Requirement          | Supported range   | Notes                                                                   |
 | -------------------- | ----------------- | ----------------------------------------------------------------------- |
 | Node.js              | `>=22.18`         | Enforced by this package's `engines` field.                             |
-| `oxlint`             | `>=1.56.0 <2.0.0` | Required peer dependency and source of native plugins.                  |
+| `oxlint`             | `>=1.80.0 <2.0.0` | Required peer dependency and source of native plugins.                  |
 | `oxfmt`              | `>=0.1.0 <1.0.0`  | Required peer dependency used by the initializer's formatting workflow. |
 | `oxlint-tailwindcss` | `^1.7.1`          | Optional; required only when `tailwindcss` is configured.               |
 | `oxlint-tsgolint`    | `^7.0.2001`       | Optional; required only when `typeAware` is enabled.                    |
@@ -250,7 +250,7 @@ composition; the default factory is simpler for most projects.
 | `typescript` | TypeScript files; enforces separate type-only imports and rejects duplicate imports while allowing one type-only import from the same module. |
 | `imports`    | Enables the native `import` plugin.                                                                                                           |
 | `promise`    | Script files; `catch-or-return` and `no-return-wrap` errors.                                                                                  |
-| `react`      | JSX/TSX; Hooks rules with exhaustive dependencies as a warning.                                                                               |
+| `react`      | Script files; Hooks rules with exhaustive dependencies as a warning; supports the automatic JSX runtime.                                      |
 | `reactPerf`  | JSX/TSX; warns about new JSX, array, function, and object values passed as props.                                                             |
 | `nextjs`     | JSX/TSX; async client component and duplicate head errors, HTML link warning.                                                                 |
 | `jsxA11y`    | JSX/TSX; alt text, ARIA props/roles, and anchor validity checks.                                                                              |
@@ -271,8 +271,8 @@ export default defineConfig({ extends: [base, typescript, node] });
 
 ### React
 
-`react: true` applies Hooks rules to `**/*.{jsx,tsx}` and enables JSX A11y unless
-`jsxA11y: false` is explicit.
+`react: true` applies Hooks rules to script files, supports the automatic JSX runtime, and enables
+JSX A11y unless `jsxA11y: false` is explicit.
 
 ### Next.js
 

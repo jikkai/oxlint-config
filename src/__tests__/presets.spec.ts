@@ -32,6 +32,7 @@ interface IPrintedConfig {
 
 interface IStableFixture {
   diagnostic: string;
+  diagnostics?: readonly string[];
   env?: string;
   invalid: string;
   name: string;
@@ -59,7 +60,8 @@ const stableFixtures: readonly IStableFixture[] = [
   },
   {
     diagnostic: "react-hooks(rules-of-hooks)",
-    invalid: "react/invalid.jsx",
+    diagnostics: ["react-hooks(exhaustive-deps)", "react-hooks(rules-of-hooks)"],
+    invalid: "react/invalid.ts",
     name: "React",
     plugin: "react",
     rule: "react/rules-of-hooks",
@@ -158,7 +160,7 @@ describe("stable defaults", () => {
       expect(preset.overrides?.[0]?.rules).toBeDefined();
     }
 
-    expect(react.overrides?.[0]?.files).toEqual(["**/*.{jsx,tsx}"]);
+    expect(react.overrides?.[0]?.files).toEqual(["**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}"]);
     expect(reactPerf.overrides?.[0]?.files).toEqual(["**/*.{jsx,tsx}"]);
     expect(nextjs.overrides?.[0]?.files).toEqual(["**/*.{jsx,tsx}"]);
     expect(jsxA11y.overrides?.[0]?.files).toEqual(["**/*.{jsx,tsx}"]);
@@ -198,7 +200,7 @@ describe("stable defaults", () => {
 
   it.each(stableFixtures)(
     "$name exposes and enforces its real native fixture rule",
-    ({ diagnostic, env, invalid, plugin, printConfig = true, rule, valid }) => {
+    ({ diagnostic, diagnostics, env, invalid, plugin, printConfig = true, rule, valid }) => {
       const config = "fixtures/stable.config.mjs";
       const invalidFile = `fixtures/stable/${invalid}`;
       const validFile = `fixtures/stable/${valid}`;
@@ -232,6 +234,12 @@ describe("stable defaults", () => {
       );
       expect(invalidResult.status).toBe(1);
       expect(invalidResult.stdout).toContain(`"code": "${diagnostic}"`);
+      if (diagnostics !== undefined) {
+        const output = JSON.parse(invalidResult.stdout) as {
+          diagnostics: { code: string }[];
+        };
+        expect(output.diagnostics.map(({ code }) => code).toSorted()).toEqual(diagnostics);
+      }
 
       const validResult = runOxlint(
         "--config",

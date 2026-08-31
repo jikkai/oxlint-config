@@ -79,9 +79,12 @@ export const react = defineConfig({
   plugins: ["react"],
   overrides: [
     {
-      files: jsxFiles,
+      files: scriptFiles,
       rules: {
         "react/exhaustive-deps": "warn",
+        "react/exhaustive-effect-dependencies": "off",
+        "react/hooks": "off",
+        "react/react-in-jsx-scope": "off",
         "react/rules-of-hooks": "error",
       },
     },
