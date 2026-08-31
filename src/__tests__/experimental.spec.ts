@@ -64,12 +64,7 @@ const experimentalFixtures = [
 ] as const;
 
 function runOxlint(...args: string[]) {
-  const npmExecPath = process.env.npm_execpath;
-  if (!npmExecPath) throw new Error("Cannot run Oxlint: npm_execpath is unavailable");
-
-  return spawnSync(process.execPath, [npmExecPath, "exec", "oxlint", ...args], {
-    encoding: "utf8",
-  });
+  return spawnSync("oxlint", args, { encoding: "utf8" });
 }
 
 describe("experimental JS-plugin adapters", () => {
@@ -125,19 +120,6 @@ describe("experimental JS-plugin adapters", () => {
       { name: "storybook", specifier: "eslint-plugin-storybook" },
       { name: "testing-library", specifier: "eslint-plugin-testing-library" },
     ]);
-  });
-
-  it("fails clearly when the pnpm CLI path is unavailable", () => {
-    const npmExecPath = process.env.npm_execpath;
-    delete process.env.npm_execpath;
-
-    try {
-      expect(() => runOxlint("--version")).toThrowError(
-        "Cannot run Oxlint: npm_execpath is unavailable",
-      );
-    } finally {
-      if (npmExecPath !== undefined) process.env.npm_execpath = npmExecPath;
-    }
   });
 
   it.each(experimentalFixtures)(

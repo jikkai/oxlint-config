@@ -122,12 +122,7 @@ const stableFixtures: readonly IStableFixture[] = [
 ];
 
 function runOxlint(...args: string[]) {
-  const npmExecPath = process.env.npm_execpath;
-  if (!npmExecPath) throw new Error("Cannot run Oxlint: npm_execpath is unavailable");
-
-  return spawnSync(process.execPath, [npmExecPath, "exec", "oxlint", ...args], {
-    encoding: "utf8",
-  });
+  return spawnSync("oxlint", args, { encoding: "utf8" });
 }
 
 describe("stable defaults", () => {
