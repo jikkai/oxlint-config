@@ -113,6 +113,7 @@ const stableFixtures: readonly IStableFixture[] = [
   },
   {
     diagnostic: "tailwindcss(no-unknown-classes)",
+    diagnostics: ["tailwindcss(no-dynamic-classes)", "tailwindcss(no-unknown-classes)"],
     invalid: "tailwindcss/invalid.ts",
     name: "Tailwind CSS",
     printConfig: false,

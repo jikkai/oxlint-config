@@ -40,13 +40,13 @@ can install both tools and prepare a project without replacing an existing lint 
 | Requirement          | Supported range   | Notes                                                                   |
 | -------------------- | ----------------- | ----------------------------------------------------------------------- |
 | Node.js              | `>=22.18`         | Enforced by this package's `engines` field.                             |
-| `oxlint`             | `>=1.80.0 <2.0.0` | Required peer dependency and source of native plugins.                  |
-| `oxfmt`              | `>=0.1.0 <1.0.0`  | Required peer dependency used by the initializer's formatting workflow. |
-| `oxlint-tailwindcss` | `^1.7.1`          | Optional; required only when `tailwindcss` is configured.               |
-| `oxlint-tsgolint`    | `^7.0.2001`       | Optional; required only when `typeAware` is enabled.                    |
+| `oxlint`             | `>=1.89.0 <2.0.0` | Required peer dependency and source of native plugins.                  |
+| `oxfmt`              | `>=0.74.0 <1.0.0` | Required peer dependency used by the initializer's formatting workflow. |
+| `oxlint-tailwindcss` | `^1.16.0`         | Optional; required only when `tailwindcss` is configured.               |
+| `oxlint-tsgolint`    | `^7.0.2004`       | Optional; required only when `typeAware` is enabled.                    |
 
 The initializer supports pnpm, npm, Yarn, and Bun projects when it can identify one package
-manager safely. Repository development uses pnpm `11.18.0`.
+manager safely. Repository development uses pnpm `12.14.0`.
 
 For upstream behavior and supported syntax, consult the official
 [Oxlint documentation](https://oxc.rs/docs/guide/usage/linter.html) and
@@ -301,7 +301,9 @@ export default amamo({
 ```
 
 For monorepos, `entryPoint` also accepts ordered `{ files, use }` mappings. The preset enables a
-focused set of the plugin's rules; use `rules` for severity changes. Tailwind CSS v3 is not supported.
+focused set of the plugin's rules; use `rules` for severity changes. This includes rejecting
+runtime-built class names such as `bg-${color}-500`: choose between complete class names instead,
+so Tailwind can generate their CSS. Tailwind CSS v3 is not supported.
 See the [oxlint-tailwindcss setup guide](https://oxlint-tailwindcss.pages.dev/setup). Because it runs
 through Oxlint's JavaScript plugin API, that upstream API remains Alpha.
 
@@ -370,12 +372,12 @@ compatibility. Install only the packages you enable.
 
 | Option           | Package                         | Tested peer range | Scoped rule                                                                 |
 | ---------------- | ------------------------------- | ----------------- | --------------------------------------------------------------------------- |
-| `cypress`        | `eslint-plugin-cypress`         | `^6.4.3`          | `cypress/no-assigning-return-values` as an error in Cypress files.          |
-| `mocha`          | `eslint-plugin-mocha`           | `^12.0.1`         | `mocha/no-exclusive-tests` as a warning in test files.                      |
-| `playwright`     | `eslint-plugin-playwright`      | `^2.11.0`         | `playwright/no-focused-test` as an error in test files.                     |
-| `regexp`         | `eslint-plugin-regexp`          | `^3.1.1`          | `regexp/no-dupe-characters-character-class` as an error in script files.    |
-| `sonarjs`        | `eslint-plugin-sonarjs`         | `^4.2.0`          | `sonarjs/no-all-duplicated-branches` as an error in script files.           |
-| `storybook`      | `eslint-plugin-storybook`       | `^10.5.5`         | `storybook/default-exports` as an error in stories and `.storybook` files.  |
+| `cypress`        | `eslint-plugin-cypress`         | `^7.0.2`          | `cypress/no-assigning-return-values` as an error in Cypress files.          |
+| `mocha`          | `eslint-plugin-mocha`           | `^12.0.2`         | `mocha/no-exclusive-tests` as a warning in test files.                      |
+| `playwright`     | `eslint-plugin-playwright`      | `^2.12.1`         | `playwright/no-focused-test` as an error in test files.                     |
+| `regexp`         | `eslint-plugin-regexp`          | `^3.3.1`          | `regexp/no-dupe-characters-character-class` as an error in script files.    |
+| `sonarjs`        | `eslint-plugin-sonarjs`         | `^4.2.2`          | `sonarjs/no-all-duplicated-branches` as an error in script files.           |
+| `storybook`      | `eslint-plugin-storybook`       | `^10.6.3`         | `storybook/default-exports` as an error in stories and `.storybook` files.  |
 | `testingLibrary` | `eslint-plugin-testing-library` | `^7.16.2`         | `testing-library/no-global-regexp-flag-in-query` as an error in test files. |
 
 For example:

@@ -157,6 +157,7 @@ export function tailwindcss(options: ITailwindcssOptions) {
       "tailwindcss/no-conflicting-classes": "error",
       "tailwindcss/no-deprecated-classes": "error",
       "tailwindcss/no-duplicate-classes": "warn",
+      "tailwindcss/no-dynamic-classes": "error",
       "tailwindcss/no-unknown-classes": "error",
       "tailwindcss/enforce-canonical": "warn",
       "tailwindcss/no-unnecessary-arbitrary-value": "warn",

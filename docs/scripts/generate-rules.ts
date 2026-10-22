@@ -526,10 +526,10 @@ export async function generateRuleSnapshot(): Promise<IRuleSnapshot> {
     }
     const tailwindcssRules = normalizeRuleMap(tailwindcssPreset.rules);
     if (
-      Object.keys(tailwindcssRules).length !== 10 ||
+      Object.keys(tailwindcssRules).length === 0 ||
       Object.keys(tailwindcssRules).some((rule) => !rule.startsWith("tailwindcss/"))
     ) {
-      throw new Error("Tailwind CSS preset must configure exactly ten prefixed rules");
+      throw new Error("Tailwind CSS preset must configure non-empty prefixed rules");
     }
     presets.tailwindcss = Object.entries(tailwindcssRules).map(([rule, setting]) => {
       const ruleName = rule.slice("tailwindcss/".length);

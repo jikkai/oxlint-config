@@ -25,10 +25,7 @@ export default defineConfig({
   overrides: [
     {
       files: ["docs/src/**/*.{js,jsx,ts,tsx}"],
-      rules: {
-        ...tailwindcssConfig.rules,
-        "tailwindcss/no-unknown-classes": ["error", { ignorePrefixes: ["group/", "peer/"] }],
-      },
+      rules: tailwindcssConfig.rules,
     },
     {
       env: { vitest: true },
