@@ -37,7 +37,6 @@ interface IStableFixture {
   invalid: string;
   name: string;
   plugin?: string;
-  printConfig?: boolean;
   rule: string;
   valid: string;
 }
@@ -113,10 +112,13 @@ const stableFixtures: readonly IStableFixture[] = [
   },
   {
     diagnostic: "tailwindcss(no-unknown-classes)",
-    diagnostics: ["tailwindcss(no-dynamic-classes)", "tailwindcss(no-unknown-classes)"],
+    diagnostics: [
+      "tailwindcss(no-dynamic-classes)",
+      "tailwindcss(no-unknown-classes)",
+      "tailwindcss(no-unknown-classes)",
+    ],
     invalid: "tailwindcss/invalid.ts",
     name: "Tailwind CSS",
-    printConfig: false,
     rule: "tailwindcss/no-unknown-classes",
     valid: "tailwindcss/valid.ts",
   },
@@ -196,28 +198,26 @@ describe("stable defaults", () => {
 
   it.each(stableFixtures)(
     "$name exposes and enforces its real native fixture rule",
-    ({ diagnostic, diagnostics, env, invalid, plugin, printConfig = true, rule, valid }) => {
+    ({ diagnostic, diagnostics, env, invalid, plugin, rule, valid }) => {
       const config = "fixtures/stable.config.mjs";
       const invalidFile = `fixtures/stable/${invalid}`;
       const validFile = `fixtures/stable/${valid}`;
-      if (printConfig) {
-        const printed = runOxlint("--config", config, "--print-config", invalidFile);
+      const printed = runOxlint("--config", config, "--print-config", invalidFile);
 
-        expect(printed.status).toBe(0);
-        if (printed.status !== 0) throw new Error(printed.stderr);
+      expect(printed.status).toBe(0);
+      if (printed.status !== 0) throw new Error(printed.stderr);
 
-        const printedConfig = JSON.parse(printed.stdout) as IPrintedConfig;
-        const ruleValues = [
-          printedConfig.rules?.[rule],
-          ...(printedConfig.overrides?.map((override) => override.rules?.[rule]) ?? []),
-        ].map((value) => (Array.isArray(value) ? value[0] : value));
-        expect(ruleValues).toContain("deny");
-        if (plugin !== undefined) expect(printedConfig.plugins).toContain(plugin);
-        if (env !== undefined) {
-          expect(printedConfig.overrides).toEqual(
-            expect.arrayContaining([expect.objectContaining({ env: { [env]: true } })]),
-          );
-        }
+      const printedConfig = JSON.parse(printed.stdout) as IPrintedConfig;
+      const ruleValues = [
+        printedConfig.rules?.[rule],
+        ...(printedConfig.overrides?.map((override) => override.rules?.[rule]) ?? []),
+      ].map((value) => (Array.isArray(value) ? value[0] : value));
+      expect(ruleValues).toContain("deny");
+      if (plugin !== undefined) expect(printedConfig.plugins).toContain(plugin);
+      if (env !== undefined) {
+        expect(printedConfig.overrides).toEqual(
+          expect.arrayContaining([expect.objectContaining({ env: { [env]: true } })]),
+        );
       }
 
       const invalidResult = runOxlint(

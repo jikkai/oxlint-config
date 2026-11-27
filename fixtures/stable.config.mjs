@@ -9,7 +9,10 @@ export default amamo({
   promise: true,
   react: true,
   reactPerf: true,
-  tailwindcss: { entryPoint: "fixtures/stable/tailwindcss/styles.css" },
+  tailwindcss: {
+    entryPoint: "fixtures/stable/tailwindcss/styles.css",
+    lookupTablePatterns: ["_CLASSES$"],
+  },
   test: ["jest", "vitest"],
   typeAware: true,
   typescript: true,
