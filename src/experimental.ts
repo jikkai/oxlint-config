@@ -20,7 +20,10 @@ const adapters = {
       {
         files: ["**/cypress/**/*.{js,jsx,ts,tsx}", "**/*.cy.{js,jsx,ts,tsx}"],
         globals: { cy: "readonly" },
-        rules: { "cypress/no-assigning-return-values": "error" },
+        rules: {
+          "cypress/no-assigning-return-values": "error",
+          "cypress/no-unnecessary-assertions": "warn",
+        },
       },
     ],
   }),

@@ -38,13 +38,13 @@ export default amamo();
 | 要求                 | 支持范围          | 说明                                                   |
 | -------------------- | ----------------- | ------------------------------------------------------ |
 | Node.js              | `>=22.18`         | 由本包的 `engines` 字段约束。                          |
-| `oxlint`             | `>=1.89.0 <2.0.0` | 必需 peer dependency，也是原生插件的来源。             |
-| `oxfmt`              | `>=0.74.0 <1.0.0` | 必需 peer dependency，供初始化器生成的格式化流程使用。 |
-| `oxlint-tailwindcss` | `^1.16.0`         | 可选；仅在配置 `tailwindcss` 时需要。                  |
-| `oxlint-tsgolint`    | `^7.0.2004`       | 可选；只在启用 `typeAware` 时需要。                    |
+| `oxlint`             | `>=1.95.0 <2.0.0` | 必需 peer dependency，也是原生插件的来源。             |
+| `oxfmt`              | `>=0.80.0 <1.0.0` | 必需 peer dependency，供初始化器生成的格式化流程使用。 |
+| `oxlint-tailwindcss` | `^1.17.2`         | 可选；仅在配置 `tailwindcss` 时需要。                  |
+| `oxlint-tsgolint`    | `^7.0.2008`       | 可选；只在启用 `typeAware` 时需要。                    |
 
 当初始化器能够安全识别唯一包管理器时，它支持 pnpm、npm、Yarn 和 Bun 项目。本仓库开发使用
-pnpm `12.14.0`。
+pnpm `12.23.0`。
 
 关于上游行为和语法支持范围，请查阅官方
 [Oxlint 文档](https://oxc.rs/docs/guide/usage/linter.html)和
@@ -298,7 +298,8 @@ export default amamo({
 
 在 monorepo 中，`entryPoint` 也接受有序的 `{ files, use }` 映射。该预设启用一组核心规则；
 严重级别可通过 `rules` 调整。预设会拒绝 `bg-${color}-500` 这类运行时拼接的类名，
-应改为在完整类名之间选择，确保 Tailwind 能生成对应的 CSS。不支持 Tailwind CSS v3，详情参见
+应改为在完整类名之间选择，确保 Tailwind 能生成对应的 CSS。设置 `lookupTablePatterns: ["_CLASSES$"]` 后，
+规则也会检查 `TONE_CLASSES` 等对象的属性值中使用的类名。不支持 Tailwind CSS v3，详情参见
 [oxlint-tailwindcss 配置指南](https://oxlint-tailwindcss.pages.dev/setup)。它通过 Oxlint 的
 JavaScript 插件 API 运行，因此该上游 API 仍处于 Alpha 阶段。
 
@@ -353,8 +354,8 @@ import amamo from "@amamo/oxlint-config";
 export default amamo({ typeAware: true });
 ```
 
-该选项设置 `options.typeAware: true`，不会额外加入一个导出的预设片段。请保持 TypeScript
-启用，并通过 `rules` 或额外 override 配置需要增加的类型感知规则。类型感知检查需要
+配合 TypeScript 预设使用时，将普通对象赋给类实例类型、将数字直接赋给枚举类型都会触发警告。
+可通过 `rules` 或额外 override 配置需要增加的类型感知规则。类型感知检查需要
 `oxlint-tsgolint`；上游 TypeScript 兼容性、支持的规则、诊断与性能说明请查看官方
 [类型感知检查指南](https://oxc.rs/docs/guide/usage/linter/type-aware.html)。
 
@@ -364,15 +365,15 @@ Oxlint 兼容 ESLint 的 JavaScript 插件 API 处于 Alpha 阶段。这些适�
 其 peer dependency 均为可选，而且本包不承诺相关行为或兼容性遵循 SemVer。只安装你实际
 启用的包。
 
-| 选项             | 包                              | 已测试 peer 范围 | 限定作用域的规则                                                              |
-| ---------------- | ------------------------------- | ---------------- | ----------------------------------------------------------------------------- |
-| `cypress`        | `eslint-plugin-cypress`         | `^7.0.2`         | Cypress 文件中的 `cypress/no-assigning-return-values`，级别为 error。         |
-| `mocha`          | `eslint-plugin-mocha`           | `^12.0.2`        | 测试文件中的 `mocha/no-exclusive-tests`，级别为 warning。                     |
-| `playwright`     | `eslint-plugin-playwright`      | `^2.12.1`        | 测试文件中的 `playwright/no-focused-test`，级别为 error。                     |
-| `regexp`         | `eslint-plugin-regexp`          | `^3.3.1`         | 脚本文件中的 `regexp/no-dupe-characters-character-class`，级别为 error。      |
-| `sonarjs`        | `eslint-plugin-sonarjs`         | `^4.2.2`         | 脚本文件中的 `sonarjs/no-all-duplicated-branches`，级别为 error。             |
-| `storybook`      | `eslint-plugin-storybook`       | `^10.6.3`        | stories 与 `.storybook` 文件中的 `storybook/default-exports`，级别为 error。  |
-| `testingLibrary` | `eslint-plugin-testing-library` | `^7.16.2`        | 测试文件中的 `testing-library/no-global-regexp-flag-in-query`，级别为 error。 |
+| 选项             | 包                              | 已测试 peer 范围 | 限定作用域的规则                                                                              |
+| ---------------- | ------------------------------- | ---------------- | --------------------------------------------------------------------------------------------- |
+| `cypress`        | `eslint-plugin-cypress`         | `^7.2.0`         | Cypress 文件中的 `no-assigning-return-values`（错误）和 `no-unnecessary-assertions`（警告）。 |
+| `mocha`          | `eslint-plugin-mocha`           | `^12.0.2`        | 测试文件中的 `mocha/no-exclusive-tests`，级别为 warning。                                     |
+| `playwright`     | `eslint-plugin-playwright`      | `^2.12.2`        | 测试文件中的 `playwright/no-focused-test`，级别为 error。                                     |
+| `regexp`         | `eslint-plugin-regexp`          | `^3.3.3`         | 脚本文件中的 `regexp/no-dupe-characters-character-class`，级别为 error。                      |
+| `sonarjs`        | `eslint-plugin-sonarjs`         | `^4.2.3`         | 脚本文件中的 `sonarjs/no-all-duplicated-branches`，级别为 error。                             |
+| `storybook`      | `eslint-plugin-storybook`       | `^10.6.9`        | stories 与 `.storybook` 文件中的 `storybook/default-exports`，级别为 error。                  |
+| `testingLibrary` | `eslint-plugin-testing-library` | `^7.16.3`        | 测试文件中的 `testing-library/no-global-regexp-flag-in-query`，级别为 error。                 |
 
 例如：
 

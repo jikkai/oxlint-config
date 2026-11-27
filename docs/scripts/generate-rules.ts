@@ -481,12 +481,6 @@ export async function generateRuleSnapshot(): Promise<IRuleSnapshot> {
       resolve(repositoryRoot, "fixtures/stable.config.mjs"),
       "stable aggregate",
     );
-    verifyStableProfileUnion(
-      baseProfile,
-      contributions.map(([, contribution]) => contribution),
-      stableAggregate,
-    );
-
     const presets: Record<string, IRuleApplication[]> = {
       base: applicationsForContribution("base", baseProfile),
       typeAware: [],
@@ -531,6 +525,14 @@ export async function generateRuleSnapshot(): Promise<IRuleSnapshot> {
     ) {
       throw new Error("Tailwind CSS preset must configure non-empty prefixed rules");
     }
+    verifyStableProfileUnion(
+      baseProfile,
+      [
+        ...contributions.map(([, contribution]) => contribution),
+        { rules: tailwindcssRules, overrides: [] },
+      ],
+      stableAggregate,
+    );
     presets.tailwindcss = Object.entries(tailwindcssRules).map(([rule, setting]) => {
       const ruleName = rule.slice("tailwindcss/".length);
       const description = tailwindcssPlugin.rules[ruleName]?.meta?.docs?.description;
@@ -596,33 +598,38 @@ export async function generateRuleSnapshot(): Promise<IRuleSnapshot> {
               isRecord(override) && isRecord(override.rules) ? Object.keys(override.rules) : [],
             )
           : [];
-        if (configuredRules.length !== 1 || !configuredRules[0]?.startsWith(`${pluginName}/`)) {
-          throw new Error(`Malformed ${preset} experimental adapter: expected one prefixed rule`);
+        if (
+          !configuredRules.length ||
+          configuredRules.some((rule) => !rule.startsWith(`${pluginName}/`))
+        ) {
+          throw new Error(`Malformed ${preset} experimental adapter: expected ${pluginName} rules`);
         }
-        const { plugin: pluginLabel, rule } = normalizeRuleIdentifier(configuredRules[0]);
-        const matches = experimentalPrint.overrides.flatMap((override) => {
-          const setting = override.rules[rule];
-          return setting ? [{ scopes: override.scopes, setting }] : [];
-        });
-        if (matches.length !== 1) {
-          throw new Error(`Experimental aggregate did not contain exactly one ${rule} application`);
-        }
-
         const pluginModule = (await import(packageSpecifier)) as Record<string, unknown>;
         const plugin = isRecord(pluginModule.default) ? pluginModule.default : pluginModule;
         const pluginRules = isRecord(plugin.rules) ? plugin.rules : undefined;
-        const ruleName = configuredRules[0].slice(configuredRules[0].indexOf("/") + 1);
-        const ruleModule =
-          pluginRules && isRecord(pluginRules[ruleName]) ? pluginRules[ruleName] : undefined;
-        const meta = ruleModule && isRecord(ruleModule.meta) ? ruleModule.meta : undefined;
-        const docs = meta && isRecord(meta.docs) ? meta.docs : undefined;
-        const description =
-          docs && typeof docs.description === "string" ? docs.description : undefined;
-        const docsUrl = docs && typeof docs.url === "string" ? docs.url : "";
-        const { scopes, setting } = matches[0];
-        return [
-          preset,
-          {
+        const applications: IRuleApplication[] = [];
+        for (const identifier of configuredRules) {
+          const { plugin: pluginLabel, rule } = normalizeRuleIdentifier(identifier);
+          const matches = experimentalPrint.overrides.flatMap((override) => {
+            const setting = override.rules[rule];
+            return setting ? [{ scopes: override.scopes, setting }] : [];
+          });
+          if (matches.length !== 1) {
+            throw new Error(
+              `Experimental aggregate did not contain exactly one ${rule} application`,
+            );
+          }
+
+          const ruleName = identifier.slice(identifier.indexOf("/") + 1);
+          const ruleModule =
+            pluginRules && isRecord(pluginRules[ruleName]) ? pluginRules[ruleName] : undefined;
+          const meta = ruleModule && isRecord(ruleModule.meta) ? ruleModule.meta : undefined;
+          const docs = meta && isRecord(meta.docs) ? meta.docs : undefined;
+          const description =
+            docs && typeof docs.description === "string" ? docs.description : undefined;
+          const docsUrl = docs && typeof docs.url === "string" ? docs.url : "";
+          const { scopes, setting } = matches[0];
+          applications.push({
             ...(description ? { description } : {}),
             docsUrl,
             external: true,
@@ -632,12 +639,13 @@ export async function generateRuleSnapshot(): Promise<IRuleSnapshot> {
             rule,
             scopes,
             severity: setting.severity,
-          },
-        ] as const;
+          });
+        }
+        return [preset, applications] as const;
       }),
     );
-    for (const [preset, application] of experimentalApplications) {
-      presets[preset] = [application];
+    for (const [preset, applications] of experimentalApplications) {
+      presets[preset] = applications;
     }
 
     return sortDeterministically({

@@ -7,58 +7,47 @@ import amamo from "../config.js";
 const experimentalFixtures = [
   {
     adapter: "cypress",
-    diagnostic: "cypress(no-assigning-return-values)",
+    diagnostics: [
+      { code: "cypress(no-assigning-return-values)", severity: "error" },
+      { code: "cypress(no-unnecessary-assertions)", severity: "warning" },
+    ],
     invalid: "cypress/invalid.cy.ts",
-    rule: "cypress/no-assigning-return-values",
-    severity: "deny",
     valid: "cypress/valid.cy.ts",
   },
   {
     adapter: "mocha",
-    diagnostic: "mocha(no-exclusive-tests)",
+    diagnostics: [{ code: "mocha(no-exclusive-tests)", severity: "warning" }],
     invalid: "mocha/invalid.spec.ts",
-    rule: "mocha/no-exclusive-tests",
-    severity: "warn",
     valid: "mocha/valid.spec.ts",
   },
   {
     adapter: "playwright",
-    diagnostic: "playwright(no-focused-test)",
+    diagnostics: [{ code: "playwright(no-focused-test)", severity: "error" }],
     invalid: "playwright/invalid.spec.ts",
-    rule: "playwright/no-focused-test",
-    severity: "deny",
     valid: "playwright/valid.spec.ts",
   },
   {
     adapter: "regexp",
-    diagnostic: "regexp(no-dupe-characters-character-class)",
+    diagnostics: [{ code: "regexp(no-dupe-characters-character-class)", severity: "error" }],
     invalid: "regexp/invalid.ts",
-    rule: "regexp/no-dupe-characters-character-class",
-    severity: "deny",
     valid: "regexp/valid.ts",
   },
   {
     adapter: "sonarjs",
-    diagnostic: "sonarjs(no-all-duplicated-branches)",
+    diagnostics: [{ code: "sonarjs(no-all-duplicated-branches)", severity: "error" }],
     invalid: "sonarjs/invalid.ts",
-    rule: "sonarjs/no-all-duplicated-branches",
-    severity: "deny",
     valid: "sonarjs/valid.ts",
   },
   {
     adapter: "storybook",
-    diagnostic: "storybook(default-exports)",
+    diagnostics: [{ code: "storybook(default-exports)", severity: "error" }],
     invalid: "storybook/invalid.stories.js",
-    rule: "storybook/default-exports",
-    severity: "deny",
     valid: "storybook/valid.stories.js",
   },
   {
     adapter: "testing-library",
-    diagnostic: "testing-library(no-global-regexp-flag-in-query)",
+    diagnostics: [{ code: "testing-library(no-global-regexp-flag-in-query)", severity: "error" }],
     invalid: "testing-library/invalid.spec.ts",
-    rule: "testing-library/no-global-regexp-flag-in-query",
-    severity: "deny",
     valid: "testing-library/valid.spec.ts",
   },
 ] as const;
@@ -124,15 +113,10 @@ describe("experimental JS-plugin adapters", () => {
 
   it.each(experimentalFixtures)(
     "$adapter loads its real plugin and enforces its fixture rule",
-    ({ diagnostic, invalid, rule, severity, valid }) => {
+    ({ diagnostics, invalid, valid }) => {
       const config = "fixtures/experimental.config.mjs";
       const invalidFile = `fixtures/experimental/${invalid}`;
       const validFile = `fixtures/experimental/${valid}`;
-      const printed = runOxlint("--config", config, "--print-config", invalidFile);
-
-      expect(printed.status).toBe(0);
-      expect(printed.stdout).toContain(`"${rule}": "${severity}"`);
-
       const invalidResult = runOxlint(
         "--config",
         config,
@@ -143,7 +127,10 @@ describe("experimental JS-plugin adapters", () => {
       );
 
       expect(invalidResult.status).toBe(1);
-      expect(invalidResult.stdout).toContain(`"code": "${diagnostic}"`);
+      const output = JSON.parse(invalidResult.stdout) as { diagnostics: unknown[] };
+      for (const diagnostic of diagnostics) {
+        expect(output.diagnostics).toContainEqual(expect.objectContaining(diagnostic));
+      }
 
       const validResult = runOxlint(
         "--config",

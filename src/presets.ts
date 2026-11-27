@@ -16,6 +16,7 @@ export interface ITailwindcssOptions extends ITailwindcssClassDetectionOptions {
   debug?: boolean;
   entryPoint: string | readonly ITailwindcssEntryPoint[];
   exclude?: ITailwindcssClassDetectionOptions;
+  lookupTablePatterns?: readonly string[];
   rootFontSize?: number;
   timeout?: number;
 }
